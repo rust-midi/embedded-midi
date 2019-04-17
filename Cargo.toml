@@ -1,0 +1,10 @@
+[package]
+name = "embedded_midi"
+version = "0.1.0"
+authors = ["Mendelt Siebenga <msiebenga@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+nb = "0.1.1"
+embedded-hal = "0.2.2"
+
