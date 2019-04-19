@@ -1,16 +1,17 @@
 #![no_std]
+use embedded_hal::serial;
 
 pub struct MidiIn<RX> {
     rx: RX,
 }
 
-impl<RX> MidiIn<RX> where RX: serial::read<u8> {}
+impl<RX> MidiIn<RX> where RX: serial::Read<u8> {}
 
 struct MidiOut<TX> {
     tx: TX,
 }
 
-impl<TX> MidiOut<TX> where TX: serial::write<u8> {}
+impl<TX> MidiOut<TX> where TX: serial::Write<u8> {}
 
 #[cfg(test)]
 mod tests {
