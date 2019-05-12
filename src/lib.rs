@@ -1,6 +1,8 @@
 #![no_std]
 use embedded_hal::serial;
 
+mod midi;
+
 pub struct MidiIn<RX> {
     rx: RX,
 }
