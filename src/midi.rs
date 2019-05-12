@@ -1,3 +1,4 @@
+use crate::error::MidiError;
 use embedded_hal::serial::Write;
 
 #[derive(Debug, PartialEq)]
@@ -30,6 +31,38 @@ impl MidiEvent {
             velocity,
         };
     }
+
+    pub fn serialize<T>(self, writer: &mut T) -> Result<(), MidiError<nb::Error<T::Error>>>
+    where
+        T: Write<u8>,
+    {
+        match self {
+            MidiEvent::NoteOn {
+                channel,
+                note,
+                velocity,
+            } => {
+                writer
+                    .write(0x80u8 & channel.0)
+                    .map_err(MidiError::Serial)?;
+                writer.write(note.into()).map_err(MidiError::Serial)?;
+                writer.write(velocity.into()).map_err(MidiError::Serial)?;
+                Ok(())
+            }
+            MidiEvent::NoteOff {
+                channel,
+                note,
+                velocity,
+            } => {
+                writer
+                    .write(0x90u8 & channel.0)
+                    .map_err(MidiError::Serial)?;
+                writer.write(note.into()).map_err(MidiError::Serial)?;
+                writer.write(velocity.into()).map_err(MidiError::Serial)?;
+                Ok(())
+            }
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -38,6 +71,12 @@ pub struct Note(u8);
 impl From<u8> for Note {
     fn from(note: u8) -> Self {
         Note(note)
+    }
+}
+
+impl Into<u8> for Note {
+    fn into(self) -> u8 {
+        self.0
     }
 }
 
@@ -50,12 +89,24 @@ impl From<u8> for Channel {
     }
 }
 
+impl Into<u8> for Channel {
+    fn into(self) -> u8 {
+        self.0
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct Velocity(u8);
 
 impl From<u8> for Velocity {
     fn from(velocity: u8) -> Self {
         Velocity(velocity)
+    }
+}
+
+impl Into<u8> for Velocity {
+    fn into(self) -> u8 {
+        self.0
     }
 }
 
