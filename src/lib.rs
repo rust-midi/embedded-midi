@@ -7,7 +7,7 @@ pub struct MidiIn<RX> {
 
 impl<RX> MidiIn<RX> where RX: serial::Read<u8> {}
 
-struct MidiOut<TX> {
+pub struct MidiOut<TX> {
     tx: TX,
 }
 
