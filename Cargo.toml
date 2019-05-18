@@ -4,6 +4,9 @@ version = "0.0.1"
 authors = ["Mendelt Siebenga <msiebenga@gmail.com>"]
 edition = "2018"
 
+[badges]
+travis-ci = { repository = "mendelt/embedded-midi" }
+
 [dependencies]
 nb = "0.1.1"
 embedded-hal = "0.2.2"

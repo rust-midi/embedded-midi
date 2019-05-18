@@ -49,6 +49,7 @@ impl MidiEvent {
                 writer.write(velocity.into()).map_err(MidiError::Serial)?;
                 Ok(())
             }
+
             MidiEvent::NoteOff {
                 channel,
                 note,

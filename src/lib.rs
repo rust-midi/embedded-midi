@@ -1,3 +1,5 @@
+//! *Midi driver on top of embedded hal serial communications*
+//!
 #![no_std]
 use embedded_hal::serial;
 
