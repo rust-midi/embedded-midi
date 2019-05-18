@@ -116,7 +116,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
+    fn should_encode_note_on() {
         let note_on = MidiEvent::note_on(1.into(), 45.into(), 15.into());
 
         if let MidiEvent::NoteOn {
@@ -127,6 +127,24 @@ mod tests {
         {
             assert_eq!(channel, Channel(1));
             assert_eq!(note, Note(45));
+            assert_eq!(velocity, Velocity(15));
+        } else {
+            assert!(false);
+        }
+    }
+
+    #[test]
+    fn should_encode_note_off() {
+        let note_off = MidiEvent::note_off(0.into(), 0x30.into(), 15.into());
+
+        if let MidiEvent::NoteOff {
+            channel,
+            note,
+            velocity,
+        } = note_off
+        {
+            assert_eq!(channel, Channel(0));
+            assert_eq!(note, Note(0x30));
             assert_eq!(velocity, Velocity(15));
         } else {
             assert!(false);
