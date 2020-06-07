@@ -1,9 +1,16 @@
 [package]
 name = "embedded-midi"
 version = "0.0.1"
-authors = ["Mendelt Siebenga <msiebenga@gmail.com>"]
 edition = "2018"
 publish = false
+
+authors = ["Mendelt Siebenga <msiebenga@gmail.com>"]
+license = "MIT/Apache-2.0"
+description = "Use an embedded hal uart to send and receive midi"
+repository = "https://github.com/mendelt/mcp4725"
+categories = ["no-std", "embedded"]
+keywords = ["embedded", "midi", "uart"]
+readme = "README.md"
 
 [badges]
 travis-ci = { repository = "mendelt/embedded-midi" }
