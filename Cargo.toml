@@ -11,3 +11,6 @@ travis-ci = { repository = "mendelt/embedded-midi" }
 [dependencies]
 nb = "0.1.2"
 embedded-hal = "0.2.3"
+
+[dev-dependencies]
+embedded-hal-mock = "0.7.1"
