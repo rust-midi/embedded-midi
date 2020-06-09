@@ -2,6 +2,8 @@
 #![no_std]
 
 use cortex_m_rt::entry;
+use cortex_m_semihosting::hprintln;
+use nb::block;
 use stm32f1xx_hal::{
     pac,
     prelude::*,
@@ -30,7 +32,7 @@ fn main() -> ! {
     let rx = gpioa.pa3;
 
     // Configure serial
-    let usart = Serial::usart2(
+    let mut usart = Serial::usart2(
         dp.USART2,
         (tx, rx),
         &mut afio.mapr,
@@ -41,7 +43,12 @@ fn main() -> ! {
 
     // Configure Midi
     // <TODO>
+
     loop {
-        // Wait for note on and print to semihosting output
+        //let rec = block!(usart.read());
+        match block!(usart.read()) {
+            Ok(_) => hprintln!("byte"),
+            Err(ex) => hprintln!("error {:?}", ex),
+        };
     }
 }
