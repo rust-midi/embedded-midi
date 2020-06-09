@@ -47,7 +47,7 @@ fn main() -> ! {
     loop {
         //let rec = block!(usart.read());
         match block!(usart.read()) {
-            Ok(_) => hprintln!("byte"),
+            Ok(byte) => hprintln!("byte {:?}", byte),
             Err(ex) => hprintln!("error {:?}", ex),
         };
     }
