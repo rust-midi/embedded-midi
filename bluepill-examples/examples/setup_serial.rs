@@ -36,7 +36,7 @@ fn main() -> ! {
         dp.USART2,
         (tx, rx),
         &mut afio.mapr,
-        Config::default().baudrate(115_200.bps()),
+        Config::default().baudrate(31250.bps()).parity_none(),
         clocks,
         &mut rcc.apb1,
     );
