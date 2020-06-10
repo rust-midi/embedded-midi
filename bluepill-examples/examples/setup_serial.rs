@@ -45,10 +45,25 @@ fn main() -> ! {
     // <TODO>
 
     loop {
-        //let rec = block!(usart.read());
         match block!(usart.read()) {
-            Ok(byte) => hprintln!("byte {:?}", byte),
-            Err(ex) => hprintln!("error {:?}", ex),
+            Ok(byte) => {
+                if byte == 0x90 {
+                    // Note on
+                    let note = block!(usart.read()).unwrap();
+                    let vel = block!(usart.read()).unwrap();
+                    hprintln!("Note on {:x} vel {:x}", note, vel);
+                }
+                else if byte == 0x80 {
+                    // Note off
+                    let note = block!(usart.read()).unwrap();
+                    let vel = block!(usart.read()).unwrap();
+                    hprintln!("Note off {:x} vel {:x}", note, vel);
+                }
+                else {
+                    hprintln!("unknown byte {:x}", byte);
+                }
+            },
+            Err(ex) => { hprintln!("error {:?}", ex); },
         };
     }
 }
