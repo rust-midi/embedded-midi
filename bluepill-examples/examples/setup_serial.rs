@@ -3,13 +3,13 @@
 
 use cortex_m_rt::entry;
 use cortex_m_semihosting::hprintln;
+use embedded_midi::MidiIn;
 use nb::block;
 use stm32f1xx_hal::{
     pac,
     prelude::*,
     serial::{Config, Serial},
 };
-use embedded_midi::MidiIn;
 
 #[allow(unused_imports)]
 use panic_semihosting;

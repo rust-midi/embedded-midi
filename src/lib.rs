@@ -32,15 +32,17 @@ where
                     Some(MidiEvent::note_on(
                         midi::Channel::from(channel),
                         midi::Note::from(block!(self.rx.read()).unwrap_or(0)),
-                        midi::Velocity::from(block!(self.rx.read()).unwrap_or(0))))
-                }
-                else if message == 0x80 {
+                        midi::Velocity::from(block!(self.rx.read()).unwrap_or(0)),
+                    ))
+                } else if message == 0x80 {
                     Some(MidiEvent::note_off(
                         midi::Channel::from(channel),
                         midi::Note::from(block!(self.rx.read()).unwrap_or(0)),
-                        midi::Velocity::from(block!(self.rx.read()).unwrap_or(0))))
+                        midi::Velocity::from(block!(self.rx.read()).unwrap_or(0)),
+                    ))
+                } else {
+                    None
                 }
-                else { None }
             }
             _ => None,
         }
