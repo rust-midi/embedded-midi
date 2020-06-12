@@ -9,6 +9,7 @@ use stm32f1xx_hal::{
     prelude::*,
     serial::{Config, Serial},
 };
+use embedded_midi::MidiIn;
 
 #[allow(unused_imports)]
 use panic_semihosting;
@@ -42,28 +43,11 @@ fn main() -> ! {
     );
 
     // Configure Midi
-    // <TODO>
+    let (mut tx, mut rx) = usart.split();
+    let mut midi_in = MidiIn::new(rx);
 
     loop {
-        match block!(usart.read()) {
-            Ok(byte) => {
-                if byte == 0x90 {
-                    // Note on
-                    let note = block!(usart.read()).unwrap();
-                    let vel = block!(usart.read()).unwrap();
-                    hprintln!("Note on {:x} vel {:x}", note, vel);
-                }
-                else if byte == 0x80 {
-                    // Note off
-                    let note = block!(usart.read()).unwrap();
-                    let vel = block!(usart.read()).unwrap();
-                    hprintln!("Note off {:x} vel {:x}", note, vel);
-                }
-                else {
-                    hprintln!("unknown byte {:x}", byte);
-                }
-            },
-            Err(ex) => { hprintln!("error {:?}", ex); },
-        };
+        let event = midi_in.read();
+        hprintln!("event {:?}", event);
     }
 }
