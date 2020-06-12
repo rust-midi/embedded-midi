@@ -53,7 +53,25 @@ pub struct MidiOut<TX> {
     tx: TX,
 }
 
-impl<TX> MidiOut<TX> where TX: serial::Write<u8> {}
+impl<TX> MidiOut<TX>
+where
+    TX: serial::Write<u8>,
+{
+    pub fn write(&mut self, event: &MidiEvent) -> () {
+        // match event {
+        //     MidiEvent::NoteOn{channel, note, velocity} => {
+        //         block!(self.tx.write(0x90 & channel as u8));
+        //         block!(self.tx.write(note.0));
+        //         block!(self.tx.write(velocity));
+        //     },
+        //     MidiEvent::NoteOff{channel, note, velocity} => {
+        //         self.tx.write(0x80 & channel as u8);
+        //         self.tx.write(note);
+        //         self.tx.write(velocity);
+        //     },
+        // }
+    }
+}
 
 #[cfg(test)]
 mod tests {
