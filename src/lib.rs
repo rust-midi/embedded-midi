@@ -24,16 +24,24 @@ where
     // naive implementation, block until we've received a midi event we understand
     pub fn read(&mut self) -> Option<MidiEvent> {
         match block!(self.rx.read()) {
-            Ok(90) => Some(MidiEvent::note_on(
-                midi::Channel::from(0),
-                midi::Note::from(block!(self.rx.read()).unwrap_or(0)),
-                midi::Velocity::from(block!(self.rx.read()).unwrap_or(0)),
-            )),
-            Ok(80) => Some(MidiEvent::note_off(
-                midi::Channel::from(0),
-                midi::Note::from(block!(self.rx.read()).unwrap_or(0)),
-                midi::Velocity::from(block!(self.rx.read()).unwrap_or(0)),
-            )),
+            Ok(byte) => {
+                let message = byte & 0xf0u8;
+                let channel = byte & 0x0fu8;
+
+                if message == 0x90u8 {
+                    Some(MidiEvent::note_on(
+                        midi::Channel::from(channel),
+                        midi::Note::from(block!(self.rx.read()).unwrap_or(0)),
+                        midi::Velocity::from(block!(self.rx.read()).unwrap_or(0))))
+                }
+                else if message == 0x80 {
+                    Some(MidiEvent::note_on(
+                        midi::Channel::from(channel),
+                        midi::Note::from(block!(self.rx.read()).unwrap_or(0)),
+                        midi::Velocity::from(block!(self.rx.read()).unwrap_or(0))))
+                }
+                else { None }
+            }
             _ => None,
         }
     }
