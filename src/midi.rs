@@ -31,39 +31,6 @@ impl MidiEvent {
             velocity,
         };
     }
-
-    pub fn serialize<T>(self, writer: &mut T) -> Result<(), MidiError<nb::Error<T::Error>>>
-    where
-        T: Write<u8>,
-    {
-        match self {
-            MidiEvent::NoteOn {
-                channel,
-                note,
-                velocity,
-            } => {
-                writer
-                    .write(0x80u8 & channel.0)
-                    .map_err(MidiError::Serial)?;
-                writer.write(note.into()).map_err(MidiError::Serial)?;
-                writer.write(velocity.into()).map_err(MidiError::Serial)?;
-                Ok(())
-            }
-
-            MidiEvent::NoteOff {
-                channel,
-                note,
-                velocity,
-            } => {
-                writer
-                    .write(0x90u8 & channel.0)
-                    .map_err(MidiError::Serial)?;
-                writer.write(note.into()).map_err(MidiError::Serial)?;
-                writer.write(velocity.into()).map_err(MidiError::Serial)?;
-                Ok(())
-            }
-        }
-    }
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
