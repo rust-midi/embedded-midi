@@ -7,7 +7,7 @@ use nb::block;
 mod error;
 mod midi;
 
-pub use midi::MidiEvent;
+pub use midi::{MidiEvent, Note, Velocity, Channel};
 
 pub struct MidiIn<RX> {
     rx: RX,
@@ -57,19 +57,25 @@ impl<TX> MidiOut<TX>
 where
     TX: serial::Write<u8>,
 {
-    pub fn write(&mut self, event: &MidiEvent) -> () {
-        // match event {
-        //     MidiEvent::NoteOn{channel, note, velocity} => {
-        //         block!(self.tx.write(0x90 & channel as u8));
-        //         block!(self.tx.write(note.0));
-        //         block!(self.tx.write(velocity));
-        //     },
-        //     MidiEvent::NoteOff{channel, note, velocity} => {
-        //         self.tx.write(0x80 & channel as u8);
-        //         self.tx.write(note);
-        //         self.tx.write(velocity);
-        //     },
-        // }
+    pub fn new(tx: TX) -> Self {
+        MidiOut { tx }
+    }
+
+    pub fn write(&mut self, event: MidiEvent) -> () {
+        match event {
+            MidiEvent::NoteOn{channel, note, velocity} => {
+                let channelnum: u8 = channel.into();
+                block!(self.tx.write(0x90u8));
+                block!(self.tx.write(note.into()));
+                block!(self.tx.write(velocity.into()));
+            },
+            MidiEvent::NoteOff{channel, note, velocity} => {
+                let channelnum: u8 = channel.into();
+                block!(self.tx.write(0x80u8));
+                block!(self.tx.write(note.into()));
+                block!(self.tx.write(velocity.into()));
+            },
+        }
     }
 }
 

@@ -66,7 +66,7 @@ impl MidiEvent {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Note(u8);
 
 impl From<u8> for Note {
@@ -81,7 +81,7 @@ impl Into<u8> for Note {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Channel(u8);
 
 impl From<u8> for Channel {
@@ -96,7 +96,7 @@ impl Into<u8> for Channel {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Velocity(u8);
 
 impl From<u8> for Velocity {

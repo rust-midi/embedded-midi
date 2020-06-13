@@ -3,13 +3,13 @@
 
 use cortex_m_rt::entry;
 use cortex_m_semihosting::hprintln;
-use embedded_midi::MidiIn;
-use nb::block;
+use embedded_midi::{MidiOut, MidiEvent};
 use stm32f1xx_hal::{
     pac,
     prelude::*,
     serial::{Config, Serial},
 };
+use nb::block;
 
 #[allow(unused_imports)]
 use panic_semihosting;
@@ -43,20 +43,26 @@ fn main() -> ! {
     );
 
     // Configure Midi
-    // let (mut tx, mut rx) = usart.split();
-    // let mut midi_in = MidiOut::new(tx);
+    let (mut tx, mut rx) = usart.split();
+    let mut midi_out = MidiOut::new(tx);
 
     loop {
-        block!(usart.write(0x90u8));
-        block!(usart.write(65));
-        block!(usart.write(64));
+        let event = MidiEvent::note_on(0u8.into(), 50u8.into(), 0x40u8.into());
+        hprintln!("on {:?}", event);
+        midi_out.write(event);
 
-        hprintln!("on");
+        // block!(usart.write(0x90u8));
+        // block!(usart.write(65));
+        // block!(usart.write(64));
 
-        block!(usart.write(0x80u8));
-        block!(usart.write(65));
-        block!(usart.write(64));
+        let event = MidiEvent::note_off(0u8.into(), 50u8.into(), 0x40u8.into());
+        hprintln!("off {:?}", event);
+        midi_out.write(event);
 
-        hprintln!("off");
+        // block!(usart.write(0x80u8));
+        // block!(usart.write(65));
+        // block!(usart.write(64));
+
+        
     }
 }
