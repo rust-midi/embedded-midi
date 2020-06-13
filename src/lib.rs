@@ -72,7 +72,7 @@ where
                 velocity,
             } => {
                 let channelnum: u8 = channel.into();
-                block!(self.tx.write(0x90u8))?;
+                block!(self.tx.write(0x90u8 + channelnum))?;
                 block!(self.tx.write(note.into()))?;
                 block!(self.tx.write(velocity.into()))?;
             }
@@ -82,7 +82,7 @@ where
                 velocity,
             } => {
                 let channelnum: u8 = channel.into();
-                block!(self.tx.write(0x80u8))?;
+                block!(self.tx.write(0x80u8 + channelnum))?;
                 block!(self.tx.write(note.into()))?;
                 block!(self.tx.write(velocity.into()))?;
             }
