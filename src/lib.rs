@@ -7,7 +7,8 @@ use nb::block;
 mod error;
 mod midi;
 
-pub use midi::{MidiEvent, Note, Velocity, Channel};
+use core::fmt::Debug;
+pub use midi::{Channel, MidiEvent, Note, Velocity};
 
 pub struct MidiIn<RX> {
     rx: RX,
@@ -16,6 +17,7 @@ pub struct MidiIn<RX> {
 impl<RX, E> MidiIn<RX>
 where
     RX: serial::Read<u8, Error = E>,
+    E: Debug,
 {
     pub fn new(rx: RX) -> Self {
         MidiIn { rx }
@@ -53,29 +55,40 @@ pub struct MidiOut<TX> {
     tx: TX,
 }
 
-impl<TX> MidiOut<TX>
+impl<TX, E> MidiOut<TX>
 where
-    TX: serial::Write<u8>,
+    TX: serial::Write<u8, Error = E>,
+    E: Debug,
 {
     pub fn new(tx: TX) -> Self {
         MidiOut { tx }
     }
 
-    pub fn write(&mut self, event: MidiEvent) -> () {
+    pub fn write(&mut self, event: MidiEvent) -> Result<(), E> {
         match event {
-            MidiEvent::NoteOn{channel, note, velocity} => {
+            MidiEvent::NoteOn {
+                channel,
+                note,
+                velocity,
+            } => {
                 let channelnum: u8 = channel.into();
-                block!(self.tx.write(0x90u8));
-                block!(self.tx.write(note.into()));
-                block!(self.tx.write(velocity.into()));
-            },
-            MidiEvent::NoteOff{channel, note, velocity} => {
+                block!(self.tx.write(0x90u8))?;
+                block!(self.tx.write(note.into()))?;
+                block!(self.tx.write(velocity.into()))?;
+            }
+            MidiEvent::NoteOff {
+                channel,
+                note,
+                velocity,
+            } => {
                 let channelnum: u8 = channel.into();
-                block!(self.tx.write(0x80u8));
-                block!(self.tx.write(note.into()));
-                block!(self.tx.write(velocity.into()));
-            },
+                block!(self.tx.write(0x80u8))?;
+                block!(self.tx.write(note.into()))?;
+                block!(self.tx.write(velocity.into()))?;
+            }
         }
+
+        Ok(())
     }
 }
 

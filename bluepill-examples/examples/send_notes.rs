@@ -3,13 +3,13 @@
 
 use cortex_m_rt::entry;
 use cortex_m_semihosting::hprintln;
-use embedded_midi::{MidiOut, MidiEvent};
+use embedded_midi::{MidiEvent, MidiOut};
+use nb::block;
 use stm32f1xx_hal::{
     pac,
     prelude::*,
     serial::{Config, Serial},
 };
-use nb::block;
 
 #[allow(unused_imports)]
 use panic_semihosting;
@@ -62,7 +62,5 @@ fn main() -> ! {
         // block!(usart.write(0x80u8));
         // block!(usart.write(65));
         // block!(usart.write(64));
-
-        
     }
 }
