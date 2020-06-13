@@ -24,30 +24,31 @@ where
     }
 
     // naive implementation, block until we've received a midi event we understand
-    pub fn read(&mut self) -> Option<MidiEvent> {
-        match block!(self.rx.read()) {
-            Ok(byte) => {
-                let message = byte & 0xf0u8;
-                let channel = byte & 0x0fu8;
+    pub fn read(&mut self) -> Result<MidiEvent, E> {
+        let mut result: Option<MidiEvent> = None;
 
-                if message == 0x90u8 {
-                    Some(MidiEvent::note_on(
-                        midi::Channel::from(channel),
-                        midi::Note::from(block!(self.rx.read()).unwrap_or(0)),
-                        midi::Velocity::from(block!(self.rx.read()).unwrap_or(0)),
-                    ))
-                } else if message == 0x80 {
-                    Some(MidiEvent::note_off(
-                        midi::Channel::from(channel),
-                        midi::Note::from(block!(self.rx.read()).unwrap_or(0)),
-                        midi::Velocity::from(block!(self.rx.read()).unwrap_or(0)),
-                    ))
-                } else {
-                    None
-                }
+        while result.is_none() {
+            let byte = block!(self.rx.read())?;
+
+            let message = byte & 0xf0u8;
+            let channel = byte & 0x0fu8;
+
+            if message == 0x90u8 {
+                result = Some(MidiEvent::note_on(
+                    midi::Channel::from(channel),
+                    midi::Note::from(block!(self.rx.read())?),
+                    midi::Velocity::from(block!(self.rx.read())?),
+                ))
+            } else if message == 0x80 {
+                result = Some(MidiEvent::note_off(
+                    midi::Channel::from(channel),
+                    midi::Note::from(block!(self.rx.read())?),
+                    midi::Velocity::from(block!(self.rx.read())?),
+                ))
             }
-            _ => None,
         }
+
+        Ok(result.unwrap())
     }
 }
 
