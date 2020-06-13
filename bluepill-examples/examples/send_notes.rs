@@ -48,14 +48,14 @@ fn main() -> ! {
 
     loop {
         block!(usart.write(0x90u8));
-        block!(usart.write(0x23u8));
-        block!(usart.write(0x64u8));
+        block!(usart.write(65));
+        block!(usart.write(64));
 
         hprintln!("on");
 
         block!(usart.write(0x80u8));
-        block!(usart.write(0x23u8));
-        block!(usart.write(0x64u8));
+        block!(usart.write(65));
+        block!(usart.write(64));
 
         hprintln!("off");
     }
