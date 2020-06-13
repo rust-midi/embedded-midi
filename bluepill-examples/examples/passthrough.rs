@@ -3,7 +3,7 @@
 
 use cortex_m_rt::entry;
 use cortex_m_semihosting::hprintln;
-use embedded_midi::MidiIn;
+use embedded_midi::{MidiIn, MidiOut};
 use nb::block;
 use stm32f1xx_hal::{
     pac,
@@ -42,8 +42,15 @@ fn main() -> ! {
         &mut rcc.apb1,
     );
 
+    // Configure Midi
+    let (mut tx, mut rx) = usart.split();
+
+    let mut midi_in = MidiIn::new(rx);
+    let mut midi_out = MidiOut::new(tx);
+
     loop {
-        let byte = block!(usart.read()).unwrap();
-        block!(usart.write(byte));
+        if let Some(event) = midi_in.read() {
+            midi_out.write(event);
+        }
     }
 }
