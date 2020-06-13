@@ -51,16 +51,8 @@ fn main() -> ! {
         hprintln!("on {:?}", event);
         midi_out.write(event);
 
-        // block!(usart.write(0x90u8));
-        // block!(usart.write(65));
-        // block!(usart.write(64));
-
         let event = MidiEvent::note_off(0u8.into(), 50u8.into(), 0x40u8.into());
         hprintln!("off {:?}", event);
         midi_out.write(event);
-
-        // block!(usart.write(0x80u8));
-        // block!(usart.write(65));
-        // block!(usart.write(64));
     }
 }
