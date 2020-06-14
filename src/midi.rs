@@ -78,6 +78,22 @@ impl Into<u8> for Velocity {
     }
 }
 
+pub struct MidiParser {}
+
+impl MidiParser {
+    /// Initialize midiparser state
+    fn new() -> Self {
+        MidiParser {}
+    }
+
+    /// Parse midi event byte by byte. Call this whenever a byte is received. When a midi-event is
+    /// completed it is returned, otherwise this method updates the internal midiparser state and
+    /// and returns none.
+    fn parse_byte(&mut self, byte: u8) -> Option<MidiEvent> {
+        None
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
