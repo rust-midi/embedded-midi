@@ -49,7 +49,7 @@ fn main() -> ! {
     let mut midi_out = MidiOut::new(tx);
 
     loop {
-        if let Ok(event) = midi_in.read() {
+        if let Ok(event) = block!(midi_in.read()) {
             midi_out.write(event);
         }
     }

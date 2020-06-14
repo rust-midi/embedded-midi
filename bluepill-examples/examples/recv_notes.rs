@@ -47,7 +47,7 @@ fn main() -> ! {
     let mut midi_in = MidiIn::new(rx);
 
     loop {
-        let event = midi_in.read();
+        let event = block!(midi_in.read());
         hprintln!("event {:?}", event);
     }
 }

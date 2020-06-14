@@ -8,10 +8,11 @@ mod error;
 mod midi;
 
 use core::fmt::Debug;
-pub use midi::{Channel, MidiEvent, Note, Velocity};
+pub use midi::{Channel, MidiEvent, Note, Velocity, MidiParser};
 
 pub struct MidiIn<RX> {
     rx: RX,
+    parser: MidiParser,
 }
 
 impl<RX, E> MidiIn<RX>
@@ -20,35 +21,17 @@ where
     E: Debug,
 {
     pub fn new(rx: RX) -> Self {
-        MidiIn { rx }
+        MidiIn { rx, parser: MidiParser::new() }
     }
 
-    // naive implementation, block until we've received a midi event we understand
-    pub fn read(&mut self) -> Result<MidiEvent, E> {
-        let mut result: Option<MidiEvent> = None;
+    pub fn read(&mut self) -> nb::Result<MidiEvent, E> {
 
-        while result.is_none() {
-            let byte = block!(self.rx.read())?;
+        let byte = self.rx.read()?;
 
-            let message = byte & 0xf0u8;
-            let channel = byte & 0x0fu8;
-
-            if message == 0x90u8 {
-                result = Some(MidiEvent::note_on(
-                    midi::Channel::from(channel),
-                    midi::Note::from(block!(self.rx.read())?),
-                    midi::Velocity::from(block!(self.rx.read())?),
-                ))
-            } else if message == 0x80 {
-                result = Some(MidiEvent::note_off(
-                    midi::Channel::from(channel),
-                    midi::Note::from(block!(self.rx.read())?),
-                    midi::Velocity::from(block!(self.rx.read())?),
-                ))
-            }
+        match self.parser.parse_byte(byte) {
+            Some(event) => Ok(event),
+            None => Err(nb::Error::WouldBlock),
         }
-
-        Ok(result.unwrap())
     }
 }
 

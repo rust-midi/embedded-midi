@@ -93,7 +93,7 @@ enum MidiParserState {
 
 impl MidiParser {
     /// Initialize midiparser state
-    fn new() -> Self {
+    pub fn new() -> Self {
         MidiParser {
             state: MidiParserState::Empty,
         }
@@ -102,7 +102,7 @@ impl MidiParser {
     /// Parse midi event byte by byte. Call this whenever a byte is received. When a midi-event is
     /// completed it is returned, otherwise this method updates the internal midiparser state and
     /// and returns none.
-    fn parse_byte(&mut self, byte: u8) -> Option<MidiEvent> {
+    pub fn parse_byte(&mut self, byte: u8) -> Option<MidiEvent> {
         match self.state {
             MidiParserState::Empty => {
                 // expect the start of a new message
