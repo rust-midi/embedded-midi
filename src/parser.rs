@@ -5,7 +5,7 @@ pub struct MidiParser {
 }
 
 enum MidiParserState {
-    Empty,
+    Idle,
     NoteOnRecvd { channel: u8 },
     NoteOnNoteRecvd { channel: u8, note: u8 },
 
@@ -17,7 +17,7 @@ impl MidiParser {
     /// Initialize midiparser state
     pub fn new() -> Self {
         MidiParser {
-            state: MidiParserState::Empty,
+            state: MidiParserState::Idle,
         }
     }
 
@@ -26,18 +26,18 @@ impl MidiParser {
     /// and returns none.
     pub fn parse_byte(&mut self, byte: u8) -> Option<MidiEvent> {
         match self.state {
-            MidiParserState::Empty => {
+            MidiParserState::Idle => {
                 // expect the start of a new message
                 let message = byte & 0xf0u8;
                 let channel = byte & 0x0fu8;
 
                 match message {
-                    0x90 => {
-                        self.state = MidiParserState::NoteOnRecvd { channel };
-                        None
-                    }
                     0x80 => {
                         self.state = MidiParserState::NoteOffRecvd { channel };
+                        None
+                    }
+                    0x90 => {
+                        self.state = MidiParserState::NoteOnRecvd { channel };
                         None
                     }
                     _ => None,
@@ -52,7 +52,7 @@ impl MidiParser {
                 None
             }
             MidiParserState::NoteOnNoteRecvd { channel, note } => {
-                self.state = MidiParserState::Empty;
+                self.state = MidiParserState::Idle;
                 Some(MidiEvent::note_on(channel.into(), note.into(), byte.into()))
             }
 
@@ -64,7 +64,7 @@ impl MidiParser {
                 None
             }
             MidiParserState::NoteOffNoteRecvd { channel, note } => {
-                self.state = MidiParserState::Empty;
+                self.state = MidiParserState::Idle;
                 Some(MidiEvent::note_off(
                     channel.into(),
                     note.into(),
