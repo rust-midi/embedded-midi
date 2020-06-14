@@ -6,9 +6,11 @@ use nb::block;
 
 mod error;
 mod midi;
+mod parser;
 
 use core::fmt::Debug;
-pub use midi::{Channel, MidiEvent, Note, Velocity, MidiParser};
+pub use midi::{Channel, MidiEvent, Note, Velocity};
+pub use parser::MidiParser;
 
 pub struct MidiIn<RX> {
     rx: RX,
@@ -21,11 +23,13 @@ where
     E: Debug,
 {
     pub fn new(rx: RX) -> Self {
-        MidiIn { rx, parser: MidiParser::new() }
+        MidiIn {
+            rx,
+            parser: MidiParser::new(),
+        }
     }
 
     pub fn read(&mut self) -> nb::Result<MidiEvent, E> {
-
         let byte = self.rx.read()?;
 
         match self.parser.parse_byte(byte) {
