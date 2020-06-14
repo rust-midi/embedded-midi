@@ -43,6 +43,7 @@ impl MidiParser {
                     _ => None,
                 }
             }
+
             MidiParserState::NoteOnRecvd { channel } => {
                 self.state = MidiParserState::NoteOnNoteRecvd {
                     channel,
@@ -51,8 +52,10 @@ impl MidiParser {
                 None
             }
             MidiParserState::NoteOnNoteRecvd { channel, note } => {
+                self.state = MidiParserState::Empty;
                 Some(MidiEvent::note_on(channel.into(), note.into(), byte.into()))
             }
+
             MidiParserState::NoteOffRecvd { channel } => {
                 self.state = MidiParserState::NoteOffNoteRecvd {
                     channel,
