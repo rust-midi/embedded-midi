@@ -99,4 +99,26 @@ mod tests {
         assert_eq!(message, 0x90u8);
         assert_eq!(channel, 1);
     }
+
+    fn should_parse_note_on() {
+        let mut parser = MidiParser::new();
+
+        parser.parse_byte(0x91);
+        parser.parse_byte(0x04);
+        assert_eq!(
+            parser.parse_byte(0x34),
+            Some(MidiEvent::note_on(1.into(), 4.into(), 0x34.into()))
+        );
+    }
+
+    fn should_parse_note_off() {
+        let mut parser = MidiParser::new();
+
+        parser.parse_byte(0x82);
+        parser.parse_byte(0x76);
+        assert_eq!(
+            parser.parse_byte(0x34),
+            Some(MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()))
+        );
+    }
 }
