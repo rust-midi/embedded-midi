@@ -57,7 +57,7 @@ impl MidiParser {
                     None
                 }
                 MidiParserState::NoteOnNoteRecvd { channel, note } => {
-                    self.state = MidiParserState::Idle;
+                    self.state = MidiParserState::NoteOnRecvd { channel };
                     Some(MidiEvent::note_on(channel.into(), note.into(), byte.into()))
                 }
 
@@ -69,7 +69,7 @@ impl MidiParser {
                     None
                 }
                 MidiParserState::NoteOffNoteRecvd { channel, note } => {
-                    self.state = MidiParserState::Idle;
+                    self.state = MidiParserState::NoteOffRecvd { channel };
                     Some(MidiEvent::note_off(
                         channel.into(),
                         note.into(),
@@ -138,6 +138,26 @@ mod tests {
         assert_eq!(
             parser.parse_byte(0x34),
             Some(MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()))
+        );
+    }
+
+    #[test]
+    fn should_handle_running_state() {
+        let mut parser = MidiParser::new();
+
+        // send note-on message
+        assert_eq!(parser.parse_byte(0x82), None);
+        assert_eq!(parser.parse_byte(0x76), None);
+        assert_eq!(
+            parser.parse_byte(0x34),
+            Some(MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()))
+        );
+
+        // continue with a note on on the same channel by just sending the data bytes
+        assert_eq!(parser.parse_byte(0x33), None);
+        assert_eq!(
+            parser.parse_byte(0x65),
+            Some(MidiEvent::note_off(2.into(), 0x33.into(), 0x65.into()))
         );
     }
 }
