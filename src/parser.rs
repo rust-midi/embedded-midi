@@ -17,6 +17,10 @@ fn is_status_byte(byte: u8) -> bool {
     byte & 0x80 == 0x80
 }
 
+fn split_message_and_channel(byte: u8) -> (u8, u8) {
+    (byte & 0xf0u8, byte & 0x0fu8)
+}
+
 impl MidiParser {
     /// Initialize midiparser state
     pub fn new() -> Self {
@@ -30,8 +34,7 @@ impl MidiParser {
     /// and returns none.
     pub fn parse_byte(&mut self, byte: u8) -> Option<MidiEvent> {
         if is_status_byte(byte) {
-            let message = byte & 0xf0u8;
-            let channel = byte & 0x0fu8;
+            let (message, channel) = split_message_and_channel(byte);
 
             match message {
                 0x80 => {
@@ -84,10 +87,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn is_status_byte_should_test_msb() {
+    fn should_parse_status_byte() {
         assert!(is_status_byte(0x80u8));
         assert!(is_status_byte(0x94u8));
         assert!(!is_status_byte(0x00u8));
         assert!(!is_status_byte(0x78u8));
+    }
+
+    fn should_split_message_and_channel() {
+        let (message, channel) = split_message_and_channel(0x91u8);
+        assert_eq!(message, 0x90u8);
+        assert_eq!(channel, 1);
     }
 }
