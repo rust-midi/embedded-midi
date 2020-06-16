@@ -94,12 +94,14 @@ mod tests {
         assert!(!is_status_byte(0x78u8));
     }
 
+    #[test]
     fn should_split_message_and_channel() {
         let (message, channel) = split_message_and_channel(0x91u8);
         assert_eq!(message, 0x90u8);
         assert_eq!(channel, 1);
     }
 
+    #[test]
     fn should_parse_note_on() {
         let mut parser = MidiParser::new();
 
@@ -111,11 +113,28 @@ mod tests {
         );
     }
 
+    #[test]
     fn should_parse_note_off() {
         let mut parser = MidiParser::new();
 
         parser.parse_byte(0x82);
         parser.parse_byte(0x76);
+        assert_eq!(
+            parser.parse_byte(0x34),
+            Some(MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()))
+        );
+    }
+
+    #[test]
+    fn should_ignore_incomplete_messages() {
+        let mut parser = MidiParser::new();
+
+        // start note off message but do not finish
+        assert_eq!(parser.parse_byte(0x92), None);
+
+        // continue with a complete note on message
+        assert_eq!(parser.parse_byte(0x82), None);
+        assert_eq!(parser.parse_byte(0x76), None);
         assert_eq!(
             parser.parse_byte(0x34),
             Some(MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()))
