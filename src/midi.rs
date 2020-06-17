@@ -1,5 +1,3 @@
-use crate::error::MidiError;
-use embedded_hal::serial::Write;
 
 #[derive(Debug, PartialEq)]
 pub enum MidiEvent {
