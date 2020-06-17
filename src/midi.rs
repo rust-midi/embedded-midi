@@ -19,19 +19,19 @@ pub enum MidiEvent {
 
 impl MidiEvent {
     pub fn note_on(channel: Channel, note: Note, velocity: Velocity) -> Self {
-        return MidiEvent::NoteOn {
+        MidiEvent::NoteOn {
             channel,
             note,
             velocity,
-        };
+        }
     }
 
     pub fn note_off(channel: Channel, note: Note, velocity: Velocity) -> Self {
-        return MidiEvent::NoteOff {
+        MidiEvent::NoteOff {
             channel,
             note,
             velocity,
-        };
+        }
     }
 
     pub fn controller_change(channel: Channel, controller: u8, value: u8) -> Self {
