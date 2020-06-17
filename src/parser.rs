@@ -11,6 +11,9 @@ enum MidiParserState {
 
     NoteOffRecvd { channel: u8 },
     NoteOffNoteRecvd { channel: u8, note: u8 },
+
+    ControlChangeRecvd { channel: u8 },
+    ControlChangeControllerRecvd { channel: u8, controller: u8 },
 }
 
 fn is_status_byte(byte: u8) -> bool {
@@ -45,6 +48,10 @@ impl MidiParser {
                     self.state = MidiParserState::NoteOnRecvd { channel };
                     None
                 }
+                0xB0 => {
+                    self.state = MidiParserState::ControlChangeRecvd { channel };
+                    None
+                }
                 _ => None,
             }
         } else {
@@ -76,6 +83,21 @@ impl MidiParser {
                         byte.into(),
                     ))
                 }
+                MidiParserState::ControlChangeRecvd { channel } => {
+                    self.state = MidiParserState::ControlChangeControllerRecvd {
+                        channel,
+                        controller: byte,
+                    };
+                    None
+                }
+                MidiParserState::ControlChangeControllerRecvd {
+                    channel,
+                    controller,
+                } => Some(MidiEvent::controller_change(
+                    channel.into(),
+                    controller,
+                    byte,
+                )),
                 _ => None,
             }
         }
@@ -122,6 +144,18 @@ mod tests {
         assert_eq!(
             parser.parse_byte(0x34),
             Some(MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()))
+        );
+    }
+
+    #[test]
+    fn should_parse_control_change() {
+        let mut parser = MidiParser::new();
+
+        assert_eq!(parser.parse_byte(0xB4), None);
+        assert_eq!(parser.parse_byte(0x14), None);
+        assert_eq!(
+            parser.parse_byte(0x65),
+            Some(MidiEvent::controller_change(4.into(), 0x14, 0x65))
         );
     }
 

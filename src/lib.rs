@@ -74,6 +74,7 @@ where
                 block!(self.tx.write(note.into()))?;
                 block!(self.tx.write(velocity.into()))?;
             }
+            _ => (),
         }
 
         Ok(())

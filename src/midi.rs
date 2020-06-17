@@ -1,4 +1,3 @@
-
 #[derive(Debug, PartialEq)]
 pub enum MidiEvent {
     NoteOn {
@@ -10,6 +9,11 @@ pub enum MidiEvent {
         channel: Channel,
         note: Note,
         velocity: Velocity,
+    },
+    ControllerChange {
+        channel: Channel,
+        controller: u8,
+        value: u8,
     },
 }
 
@@ -28,6 +32,14 @@ impl MidiEvent {
             note,
             velocity,
         };
+    }
+
+    pub fn controller_change(channel: Channel, controller: u8, value: u8) -> Self {
+        MidiEvent::ControllerChange {
+            channel,
+            controller,
+            value,
+        }
     }
 }
 
