@@ -65,7 +65,11 @@ impl MidiParser {
                 }
                 MidiParserState::NoteOnNoteRecvd { channel, note } => {
                     self.state = MidiParserState::NoteOnRecvd { channel };
-                    Some(MidiEvent::note_on(channel.into(), note.into(), byte.into()))
+                    Some(MidiEvent::NoteOn {
+                        channel: channel.into(),
+                        note: note.into(),
+                        velocity: byte.into(),
+                    })
                 }
 
                 MidiParserState::NoteOffRecvd { channel } => {
@@ -77,11 +81,11 @@ impl MidiParser {
                 }
                 MidiParserState::NoteOffNoteRecvd { channel, note } => {
                     self.state = MidiParserState::NoteOffRecvd { channel };
-                    Some(MidiEvent::note_off(
-                        channel.into(),
-                        note.into(),
-                        byte.into(),
-                    ))
+                    Some(MidiEvent::NoteOff {
+                        channel: channel.into(),
+                        note: note.into(),
+                        velocity: byte.into(),
+                    })
                 }
                 MidiParserState::ControlChangeRecvd { channel } => {
                     self.state = MidiParserState::ControlChangeControllerRecvd {
@@ -95,7 +99,11 @@ impl MidiParser {
                     controller,
                 } => {
                     self.state = MidiParserState::ControlChangeRecvd { channel };
-                    Some(MidiEvent::control_change(channel.into(), controller, byte))
+                    Some(MidiEvent::ControlChange {
+                        channel: channel.into(),
+                        controller,
+                        value: byte,
+                    })
                 }
                 _ => None,
             }
@@ -128,7 +136,11 @@ mod tests {
     fn should_parse_note_on() {
         MidiParser::new().assert_result(
             &[0x91, 0x04, 0x34],
-            &[MidiEvent::note_on(1.into(), 4.into(), 0x34.into())],
+            &[MidiEvent::NoteOn {
+                channel: 1.into(),
+                note: 4.into(),
+                velocity: 0x34.into(),
+            }],
         );
     }
 
@@ -140,8 +152,16 @@ mod tests {
                 0x33, 0x65, // Second note on without status byte
             ],
             &[
-                MidiEvent::note_on(2.into(), 0x76.into(), 0x34.into()),
-                MidiEvent::note_on(2.into(), 0x33.into(), 0x65.into()),
+                MidiEvent::NoteOn {
+                    channel: 2.into(),
+                    note: 0x76.into(),
+                    velocity: 0x34.into(),
+                },
+                MidiEvent::NoteOn {
+                    channel: 2.into(),
+                    note: 0x33.into(),
+                    velocity: 0x65.into(),
+                },
             ],
         );
     }
@@ -150,7 +170,11 @@ mod tests {
     fn should_parse_note_off() {
         MidiParser::new().assert_result(
             &[0x82, 0x76, 0x34],
-            &[MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into())],
+            &[MidiEvent::NoteOff {
+                channel: 2.into(),
+                note: 0x76.into(),
+                velocity: 0x34.into(),
+            }],
         );
     }
 
@@ -162,8 +186,16 @@ mod tests {
                 0x33, 0x65, // Second note_off without status byte
             ],
             &[
-                MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()),
-                MidiEvent::note_off(2.into(), 0x33.into(), 0x65.into()),
+                MidiEvent::NoteOff {
+                    channel: 2.into(),
+                    note: 0x76.into(),
+                    velocity: 0x34.into(),
+                },
+                MidiEvent::NoteOff {
+                    channel: 2.into(),
+                    note: 0x33.into(),
+                    velocity: 0x65.into(),
+                },
             ],
         );
     }
@@ -172,7 +204,11 @@ mod tests {
     fn should_parse_control_change() {
         MidiParser::new().assert_result(
             &[0xB2, 0x76, 0x34],
-            &[MidiEvent::control_change(2.into(), 0x76, 0x34)],
+            &[MidiEvent::ControlChange {
+                channel: 2.into(),
+                controller: 0x76,
+                value: 0x34,
+            }],
         );
     }
 
@@ -184,8 +220,16 @@ mod tests {
                 0x43, 0x01, // Second control change without status byte
             ],
             &[
-                MidiEvent::control_change(3.into(), 0x3C.into(), 0x18.into()),
-                MidiEvent::control_change(3.into(), 0x43, 0x01),
+                MidiEvent::ControlChange {
+                    channel: 3.into(),
+                    controller: 0x3C,
+                    value: 0x18.into(),
+                },
+                MidiEvent::ControlChange {
+                    channel: 3.into(),
+                    controller: 0x43,
+                    value: 0x01,
+                },
             ],
         );
     }
@@ -197,7 +241,11 @@ mod tests {
                 0x92, 0x1b, // Start note off message
                 0x82, 0x76, 0x34, // continue with a complete note on message
             ],
-            &[MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into())],
+            &[MidiEvent::NoteOff {
+                channel: 2.into(),
+                note: 0x76.into(),
+                velocity: 0x34.into(),
+            }],
         );
     }
 
