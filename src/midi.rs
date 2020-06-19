@@ -12,7 +12,7 @@ pub enum MidiEvent {
     },
     ControlChange {
         channel: Channel,
-        controller: u8,
+        control: Control,
         value: u8,
     },
 }
@@ -57,6 +57,21 @@ impl From<u8> for Velocity {
 }
 
 impl Into<u8> for Velocity {
+    fn into(self) -> u8 {
+        self.0
+    }
+}
+
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub struct Control(u8);
+
+impl From<u8> for Control {
+    fn from(control: u8) -> Self {
+        Control(control)
+    }
+}
+
+impl Into<u8> for Control {
     fn into(self) -> u8 {
         self.0
     }

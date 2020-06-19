@@ -13,7 +13,7 @@ enum MidiParserState {
     NoteOffNoteRecvd { channel: u8, note: u8 },
 
     ControlChangeRecvd { channel: u8 },
-    ControlChangeControllerRecvd { channel: u8, controller: u8 },
+    ControlChangeControlRecvd { channel: u8, control: u8 },
 }
 
 fn is_status_byte(byte: u8) -> bool {
@@ -88,20 +88,17 @@ impl MidiParser {
                     })
                 }
                 MidiParserState::ControlChangeRecvd { channel } => {
-                    self.state = MidiParserState::ControlChangeControllerRecvd {
+                    self.state = MidiParserState::ControlChangeControlRecvd {
                         channel,
-                        controller: byte,
+                        control: byte,
                     };
                     None
                 }
-                MidiParserState::ControlChangeControllerRecvd {
-                    channel,
-                    controller,
-                } => {
+                MidiParserState::ControlChangeControlRecvd { channel, control } => {
                     self.state = MidiParserState::ControlChangeRecvd { channel };
                     Some(MidiEvent::ControlChange {
                         channel: channel.into(),
-                        controller,
+                        control: control.into(),
                         value: byte,
                     })
                 }
@@ -206,7 +203,7 @@ mod tests {
             &[0xB2, 0x76, 0x34],
             &[MidiEvent::ControlChange {
                 channel: 2.into(),
-                controller: 0x76,
+                control: 0x76.into(),
                 value: 0x34,
             }],
         );
@@ -222,12 +219,12 @@ mod tests {
             &[
                 MidiEvent::ControlChange {
                     channel: 3.into(),
-                    controller: 0x3C,
-                    value: 0x18.into(),
+                    control: 0x3C.into(),
+                    value: 0x18,
                 },
                 MidiEvent::ControlChange {
                     channel: 3.into(),
-                    controller: 0x43,
+                    control: 0x43.into(),
                     value: 0x01,
                 },
             ],
