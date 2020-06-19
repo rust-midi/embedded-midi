@@ -14,6 +14,9 @@ enum MidiParserState {
 
     ControlChangeRecvd { channel: u8 },
     ControlChangeControlRecvd { channel: u8, control: u8 },
+
+    PitchBendRecvd { channel: u8 },
+    PitchBendFirstByteRecvd { channel: u8, byte1: u8 },
 }
 
 fn is_status_byte(byte: u8) -> bool {
@@ -50,6 +53,10 @@ impl MidiParser {
                 }
                 0xB0 => {
                     self.state = MidiParserState::ControlChangeRecvd { channel };
+                    None
+                }
+                0xE0 => {
+                    self.state = MidiParserState::PitchBendRecvd { channel };
                     None
                 }
                 _ => None,
@@ -100,6 +107,19 @@ impl MidiParser {
                         channel: channel.into(),
                         control: control.into(),
                         value: byte,
+                    })
+                }
+                MidiParserState::PitchBendRecvd { channel } => {
+                    self.state = MidiParserState::PitchBendFirstByteRecvd {
+                        channel,
+                        byte1: byte,
+                    };
+                    None
+                }
+                MidiParserState::PitchBendFirstByteRecvd { channel, byte1 } => {
+                    Some(MidiEvent::PitchBend {
+                        channel: channel.into(),
+                        value: (byte1, byte).into(),
                     })
                 }
                 _ => None,
@@ -228,6 +248,17 @@ mod tests {
                     value: 0x01,
                 },
             ],
+        );
+    }
+
+    #[test]
+    fn should_parse_pitchbend() {
+        MidiParser::new().assert_result(
+            &[0xE8, 0x14, 0x56],
+            &[MidiEvent::PitchBend {
+                channel: 8.into(),
+                value: (0x14, 0x56).into(),
+            }],
         );
     }
 

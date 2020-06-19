@@ -15,6 +15,10 @@ pub enum MidiEvent {
         control: Control,
         value: u8,
     },
+    PitchBend {
+        channel: Channel,
+        value: Value14,
+    },
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
