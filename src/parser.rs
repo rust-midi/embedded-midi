@@ -117,6 +117,7 @@ impl MidiParser {
                     None
                 }
                 MidiParserState::PitchBendFirstByteRecvd { channel, byte1 } => {
+                    self.state = MidiParserState::PitchBendRecvd { channel };
                     Some(MidiEvent::PitchBend {
                         channel: channel.into(),
                         value: (byte1, byte).into(),
@@ -259,6 +260,26 @@ mod tests {
                 channel: 8.into(),
                 value: (0x14, 0x56).into(),
             }],
+        );
+    }
+
+    #[test]
+    fn should_parse_pitchbend_running_state() {
+        MidiParser::new().assert_result(
+            &[
+                0xE3, 0x3C, 0x18, // First pitchbend
+                0x43, 0x01, // Second pitchbend without status byte
+            ],
+            &[
+                MidiEvent::PitchBend {
+                    channel: 3.into(),
+                    value: (0x3C, 0x18).into(),
+                },
+                MidiEvent::PitchBend {
+                    channel: 3.into(),
+                    value: (0x43, 0x01).into(),
+                },
+            ],
         );
     }
 
