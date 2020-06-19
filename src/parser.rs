@@ -109,7 +109,9 @@ impl MidiParser {
 
 #[cfg(test)]
 mod tests {
+    extern crate std;
     use super::*;
+    use std::vec::Vec;
 
     #[test]
     fn should_parse_status_byte() {
@@ -240,5 +242,24 @@ mod tests {
             parser.parse_byte(0x34),
             Some(MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()))
         );
+    }
+
+    #[test]
+    fn use_new_assert_midi() {
+        assert_midi(
+            &[0x92, 0x82, 0x76, 0x34],
+            &[MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into())],
+        );
+    }
+
+    fn assert_midi(bytes: &[u8], expected_events: &[MidiEvent]) {
+        let mut parser = MidiParser::new();
+
+        let events: Vec<MidiEvent> = bytes
+            .into_iter()
+            .filter_map(|byte| parser.parse_byte(*byte))
+            .collect();
+
+        assert_eq!(expected_events, events.as_slice());
     }
 }
