@@ -136,6 +136,26 @@ mod tests {
     }
 
     #[test]
+    fn should_handle_note_on_running_state() {
+        let mut parser = MidiParser::new();
+
+        // send note-on message
+        assert_eq!(parser.parse_byte(0x92), None);
+        assert_eq!(parser.parse_byte(0x76), None);
+        assert_eq!(
+            parser.parse_byte(0x34),
+            Some(MidiEvent::note_on(2.into(), 0x76.into(), 0x34.into()))
+        );
+
+        // continue with a note on on the same channel by just sending the data bytes
+        assert_eq!(parser.parse_byte(0x33), None);
+        assert_eq!(
+            parser.parse_byte(0x65),
+            Some(MidiEvent::note_on(2.into(), 0x33.into(), 0x65.into()))
+        );
+    }
+
+    #[test]
     fn should_parse_note_off() {
         let mut parser = MidiParser::new();
 
@@ -144,6 +164,26 @@ mod tests {
         assert_eq!(
             parser.parse_byte(0x34),
             Some(MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()))
+        );
+    }
+
+    #[test]
+    fn should_handle_note_off_running_state() {
+        let mut parser = MidiParser::new();
+
+        // send note-off message
+        assert_eq!(parser.parse_byte(0x82), None);
+        assert_eq!(parser.parse_byte(0x76), None);
+        assert_eq!(
+            parser.parse_byte(0x34),
+            Some(MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()))
+        );
+
+        // continue with a note on on the same channel by just sending the data bytes
+        assert_eq!(parser.parse_byte(0x33), None);
+        assert_eq!(
+            parser.parse_byte(0x65),
+            Some(MidiEvent::note_off(2.into(), 0x33.into(), 0x65.into()))
         );
     }
 
@@ -172,26 +212,6 @@ mod tests {
         assert_eq!(
             parser.parse_byte(0x34),
             Some(MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()))
-        );
-    }
-
-    #[test]
-    fn should_handle_running_state() {
-        let mut parser = MidiParser::new();
-
-        // send note-on message
-        assert_eq!(parser.parse_byte(0x82), None);
-        assert_eq!(parser.parse_byte(0x76), None);
-        assert_eq!(
-            parser.parse_byte(0x34),
-            Some(MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()))
-        );
-
-        // continue with a note on on the same channel by just sending the data bytes
-        assert_eq!(parser.parse_byte(0x33), None);
-        assert_eq!(
-            parser.parse_byte(0x65),
-            Some(MidiEvent::note_off(2.into(), 0x33.into(), 0x65.into()))
         );
     }
 }
