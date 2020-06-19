@@ -130,117 +130,78 @@ mod tests {
 
     #[test]
     fn should_parse_note_on() {
-        let mut parser = MidiParser::new();
-
-        parser.parse_byte(0x91);
-        parser.parse_byte(0x04);
-        assert_eq!(
-            parser.parse_byte(0x34),
-            Some(MidiEvent::note_on(1.into(), 4.into(), 0x34.into()))
+        MidiParser::new().assert_result(
+            &[0x91, 0x04, 0x34],
+            &[MidiEvent::note_on(1.into(), 4.into(), 0x34.into())],
         );
     }
 
     #[test]
     fn should_handle_note_on_running_state() {
-        let mut parser = MidiParser::new();
-
-        // send note-on message
-        assert_eq!(parser.parse_byte(0x92), None);
-        assert_eq!(parser.parse_byte(0x76), None);
-        assert_eq!(
-            parser.parse_byte(0x34),
-            Some(MidiEvent::note_on(2.into(), 0x76.into(), 0x34.into()))
-        );
-
-        // continue with a note on on the same channel by just sending the data bytes
-        assert_eq!(parser.parse_byte(0x33), None);
-        assert_eq!(
-            parser.parse_byte(0x65),
-            Some(MidiEvent::note_on(2.into(), 0x33.into(), 0x65.into()))
+        MidiParser::new().assert_result(
+            &[
+                0x92, 0x76, 0x34, // First note_on
+                0x33, 0x65, // Second note on without status byte
+            ],
+            &[
+                MidiEvent::note_on(2.into(), 0x76.into(), 0x34.into()),
+                MidiEvent::note_on(2.into(), 0x33.into(), 0x65.into()),
+            ],
         );
     }
 
     #[test]
     fn should_parse_note_off() {
-        let mut parser = MidiParser::new();
-
-        parser.parse_byte(0x82);
-        parser.parse_byte(0x76);
-        assert_eq!(
-            parser.parse_byte(0x34),
-            Some(MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()))
+        MidiParser::new().assert_result(
+            &[0x82, 0x76, 0x34],
+            &[MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into())],
         );
     }
 
     #[test]
     fn should_handle_note_off_running_state() {
-        let mut parser = MidiParser::new();
-
-        // send note-off message
-        assert_eq!(parser.parse_byte(0x82), None);
-        assert_eq!(parser.parse_byte(0x76), None);
-        assert_eq!(
-            parser.parse_byte(0x34),
-            Some(MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()))
-        );
-
-        // continue with a note on on the same channel by just sending the data bytes
-        assert_eq!(parser.parse_byte(0x33), None);
-        assert_eq!(
-            parser.parse_byte(0x65),
-            Some(MidiEvent::note_off(2.into(), 0x33.into(), 0x65.into()))
+        MidiParser::new().assert_result(
+            &[
+                0x82, 0x76, 0x34, // First note_off
+                0x33, 0x65, // Second note_off without status byte
+            ],
+            &[
+                MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()),
+                MidiEvent::note_off(2.into(), 0x33.into(), 0x65.into()),
+            ],
         );
     }
 
     #[test]
     fn should_parse_control_change() {
-        let mut parser = MidiParser::new();
-
-        parser.parse_byte(0xB2);
-        parser.parse_byte(0x76);
-        assert_eq!(
-            parser.parse_byte(0x34),
-            Some(MidiEvent::controller_change(2.into(), 0x76, 0x34))
+        MidiParser::new().assert_result(
+            &[0xB2, 0x76, 0x34],
+            &[MidiEvent::controller_change(2.into(), 0x76, 0x34)],
         );
     }
 
     #[test]
     fn should_parse_control_change_running_state() {
-        let mut parser = MidiParser::new();
-
-        // send control change message
-        assert_eq!(parser.parse_byte(0xb3), None);
-        assert_eq!(parser.parse_byte(0x3C), None);
-        assert_eq!(
-            parser.parse_byte(0x18),
-            Some(MidiEvent::controller_change(
-                3.into(),
-                0x3C.into(),
-                0x18.into()
-            ))
-        );
-
-        // continue with a note on on the same channel by just sending the data bytes
-        assert_eq!(parser.parse_byte(0x43), None);
-        assert_eq!(
-            parser.parse_byte(0x01),
-            Some(MidiEvent::controller_change(3.into(), 0x43, 0x01))
+        MidiParser::new().assert_result(
+            &[
+                0xb3, 0x3C, 0x18, // First control change
+                0x43, 0x01, // Second control change without status byte
+            ],
+            &[
+                MidiEvent::controller_change(3.into(), 0x3C.into(), 0x18.into()),
+                MidiEvent::controller_change(3.into(), 0x43, 0x01),
+            ],
         );
     }
 
     #[test]
     fn should_ignore_incomplete_messages() {
-        let mut parser = MidiParser::new();
-
-        // start note off message but do not finish
-        assert_eq!(parser.parse_byte(0x92), None);
-
-        // continue with a complete note on message
-        assert_eq!(parser.parse_byte(0x82), None);
-        assert_eq!(parser.parse_byte(0x76), None);
-        assert_eq!(
-            parser.parse_byte(0x34),
-            Some(MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into()))
+        MidiParser::new().assert_result(
+            &[
+                0x92, 0x1b, // Start note off message
+                0x82, 0x76, 0x34, // continue with a complete note on message
+            ],
+            &[MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into())],
         );
     }
 
