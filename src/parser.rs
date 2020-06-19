@@ -93,11 +93,14 @@ impl MidiParser {
                 MidiParserState::ControlChangeControllerRecvd {
                     channel,
                     controller,
-                } => Some(MidiEvent::controller_change(
-                    channel.into(),
-                    controller,
-                    byte,
-                )),
+                } => {
+                    self.state = MidiParserState::ControlChangeRecvd { channel };
+                    Some(MidiEvent::controller_change(
+                        channel.into(),
+                        controller,
+                        byte,
+                    ))
+                }
                 _ => None,
             }
         }
@@ -191,11 +194,35 @@ mod tests {
     fn should_parse_control_change() {
         let mut parser = MidiParser::new();
 
-        assert_eq!(parser.parse_byte(0xB4), None);
-        assert_eq!(parser.parse_byte(0x14), None);
+        parser.parse_byte(0xB2);
+        parser.parse_byte(0x76);
         assert_eq!(
-            parser.parse_byte(0x65),
-            Some(MidiEvent::controller_change(4.into(), 0x14, 0x65))
+            parser.parse_byte(0x34),
+            Some(MidiEvent::controller_change(2.into(), 0x76, 0x34))
+        );
+    }
+
+    #[test]
+    fn should_parse_control_change_running_state() {
+        let mut parser = MidiParser::new();
+
+        // send control change message
+        assert_eq!(parser.parse_byte(0xb3), None);
+        assert_eq!(parser.parse_byte(0x3C), None);
+        assert_eq!(
+            parser.parse_byte(0x18),
+            Some(MidiEvent::controller_change(
+                3.into(),
+                0x3C.into(),
+                0x18.into()
+            ))
+        );
+
+        // continue with a note on on the same channel by just sending the data bytes
+        assert_eq!(parser.parse_byte(0x43), None);
+        assert_eq!(
+            parser.parse_byte(0x01),
+            Some(MidiEvent::controller_change(3.into(), 0x43, 0x01))
         );
     }
 
