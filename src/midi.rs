@@ -10,7 +10,7 @@ pub enum MidiEvent {
         note: Note,
         velocity: Velocity,
     },
-    ControllerChange {
+    ControlChange {
         channel: Channel,
         controller: u8,
         value: u8,
@@ -34,8 +34,8 @@ impl MidiEvent {
         }
     }
 
-    pub fn controller_change(channel: Channel, controller: u8, value: u8) -> Self {
-        MidiEvent::ControllerChange {
+    pub fn control_change(channel: Channel, controller: u8, value: u8) -> Self {
+        MidiEvent::ControlChange {
             channel,
             controller,
             value,
