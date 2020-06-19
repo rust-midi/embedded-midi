@@ -205,14 +205,6 @@ mod tests {
         );
     }
 
-    #[test]
-    fn use_new_assert_midi() {
-        MidiParser::new().assert_result(
-            &[0x92, 0x82, 0x76, 0x34],
-            &[MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into())],
-        );
-    }
-
     impl MidiParser {
         /// Test helper function, asserts if a slice of bytes parses to some set of midi events
         fn assert_result(&mut self, bytes: &[u8], expected_events: &[MidiEvent]) {
