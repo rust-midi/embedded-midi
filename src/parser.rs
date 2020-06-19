@@ -246,20 +246,21 @@ mod tests {
 
     #[test]
     fn use_new_assert_midi() {
-        assert_midi(
+        MidiParser::new().assert_result(
             &[0x92, 0x82, 0x76, 0x34],
             &[MidiEvent::note_off(2.into(), 0x76.into(), 0x34.into())],
         );
     }
 
-    fn assert_midi(bytes: &[u8], expected_events: &[MidiEvent]) {
-        let mut parser = MidiParser::new();
+    impl MidiParser {
+        /// Test helper function, asserts if a slice of bytes parses to some set of midi events
+        fn assert_result(&mut self, bytes: &[u8], expected_events: &[MidiEvent]) {
+            let events: Vec<MidiEvent> = bytes
+                .into_iter()
+                .filter_map(|byte| self.parse_byte(*byte))
+                .collect();
 
-        let events: Vec<MidiEvent> = bytes
-            .into_iter()
-            .filter_map(|byte| parser.parse_byte(*byte))
-            .collect();
-
-        assert_eq!(expected_events, events.as_slice());
+            assert_eq!(expected_events, events.as_slice());
+        }
     }
 }
