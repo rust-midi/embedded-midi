@@ -15,6 +15,10 @@ pub enum MidiEvent {
         control: Control,
         value: u8,
     },
+    ProgramChange {
+        channel: Channel,
+        program: u8,
+    },
     PitchBend {
         channel: Channel,
         value: Value14,

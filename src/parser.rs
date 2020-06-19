@@ -15,6 +15,8 @@ enum MidiParserState {
     ControlChangeRecvd { channel: u8 },
     ControlChangeControlRecvd { channel: u8, control: u8 },
 
+    ProgramChangeRecvd { channel: u8 },
+
     PitchBendRecvd { channel: u8 },
     PitchBendFirstByteRecvd { channel: u8, byte1: u8 },
 }
@@ -53,6 +55,10 @@ impl MidiParser {
                 }
                 0xB0 => {
                     self.state = MidiParserState::ControlChangeRecvd { channel };
+                    None
+                }
+                0xC0 => {
+                    self.state = MidiParserState::ProgramChangeRecvd { channel };
                     None
                 }
                 0xE0 => {
@@ -94,6 +100,7 @@ impl MidiParser {
                         velocity: byte.into(),
                     })
                 }
+
                 MidiParserState::ControlChangeRecvd { channel } => {
                     self.state = MidiParserState::ControlChangeControlRecvd {
                         channel,
@@ -109,6 +116,12 @@ impl MidiParser {
                         value: byte,
                     })
                 }
+
+                MidiParserState::ProgramChangeRecvd { channel } => Some(MidiEvent::ProgramChange {
+                    channel: channel.into(),
+                    program: byte,
+                }),
+
                 MidiParserState::PitchBendRecvd { channel } => {
                     self.state = MidiParserState::PitchBendFirstByteRecvd {
                         channel,
@@ -247,6 +260,37 @@ mod tests {
                     channel: 3.into(),
                     control: 0x43.into(),
                     value: 0x01,
+                },
+            ],
+        );
+    }
+
+    #[test]
+    fn should_parse_program_change() {
+        MidiParser::new().assert_result(
+            &[0xC9, 0x15],
+            &[MidiEvent::ProgramChange {
+                channel: 9.into(),
+                program: 0x15.into(),
+            }],
+        );
+    }
+
+    #[test]
+    fn should_parse_program_change_running_state() {
+        MidiParser::new().assert_result(
+            &[
+                0xC3, 0x67, // First program change
+                0x01, // Second program change without status byte
+            ],
+            &[
+                MidiEvent::ProgramChange {
+                    channel: 3.into(),
+                    program: 0x67.into(),
+                },
+                MidiEvent::ProgramChange {
+                    channel: 3.into(),
+                    program: 0x01,
                 },
             ],
         );
