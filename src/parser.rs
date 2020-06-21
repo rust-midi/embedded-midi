@@ -27,7 +27,18 @@ enum MidiParserState {
 }
 
 fn is_status_byte(byte: u8) -> bool {
+    // Check if most significant bit is set
     byte & 0x80 == 0x80
+}
+
+fn is_system_common(byte: u8) -> bool {
+    // Check if the byte corresponds to 0x11110xxx
+    byte & 0xf8 == 0xf0
+}
+
+fn is_system_realtime(byte: u8) -> bool {
+    // Check if the byte corresponds to 0x11111xxx
+    byte & 0xf8 == 0xf8
 }
 
 fn split_message_and_channel(byte: u8) -> (u8, Channel) {
@@ -190,6 +201,22 @@ mod tests {
         assert!(is_status_byte(0x94u8));
         assert!(!is_status_byte(0x00u8));
         assert!(!is_status_byte(0x78u8));
+    }
+
+    #[test]
+    fn should_parse_system_common() {
+        assert!(is_system_common(0xf0));
+        assert!(is_system_common(0xf4));
+        assert!(!is_system_common(0xf8));
+        assert!(!is_system_common(0x78));
+    }
+
+    #[test]
+    fn should_parse_system_realtime() {
+        assert!(is_system_realtime(0xf8));
+        assert!(is_system_realtime(0xfA));
+        assert!(!is_system_realtime(0xf7));
+        assert!(!is_system_realtime(0x78));
     }
 
     #[test]
