@@ -12,6 +12,9 @@ enum MidiParserState {
     NoteOffRecvd { channel: u8 },
     NoteOffNoteRecvd { channel: u8, note: u8 },
 
+    KeyPressureRecvd { channel: u8 },
+    KeyPressureNoteRecvd { channel: u8, note: u8 },
+
     ControlChangeRecvd { channel: u8 },
     ControlChangeControlRecvd { channel: u8, control: u8 },
 
@@ -53,6 +56,10 @@ impl MidiParser {
                 }
                 0x90 => {
                     self.state = MidiParserState::NoteOnRecvd { channel };
+                    None
+                }
+                0xA0 => {
+                    self.state = MidiParserState::KeyPressureRecvd { channel };
                     None
                 }
                 0xB0 => {
@@ -104,6 +111,22 @@ impl MidiParser {
                         channel: channel.into(),
                         note: note.into(),
                         velocity: byte.into(),
+                    })
+                }
+
+                MidiParserState::KeyPressureRecvd { channel } => {
+                    self.state = MidiParserState::KeyPressureNoteRecvd {
+                        channel,
+                        note: byte,
+                    };
+                    None
+                }
+                MidiParserState::KeyPressureNoteRecvd { channel, note } => {
+                    self.state = MidiParserState::KeyPressureRecvd { channel };
+                    Some(MidiEvent::KeyPressure {
+                        channel: channel.into(),
+                        note: note.into(),
+                        value: byte.into(),
                     })
                 }
 
@@ -239,6 +262,40 @@ mod tests {
                     channel: 2.into(),
                     note: 0x33.into(),
                     velocity: 0x65.into(),
+                },
+            ],
+        );
+    }
+
+    #[test]
+    fn should_parse_keypressure() {
+        MidiParser::new().assert_result(
+            &[0xAA, 0x13, 0x34],
+            &[MidiEvent::KeyPressure {
+                channel: 10.into(),
+                note: 0x13.into(),
+                value: 0x34.into(),
+            }],
+        );
+    }
+
+    #[test]
+    fn should_handle_keypressure_running_state() {
+        MidiParser::new().assert_result(
+            &[
+                0xA8, 0x77, 0x03, // First key_pressure
+                0x14, 0x56, // Second key_pressure without status byte
+            ],
+            &[
+                MidiEvent::KeyPressure {
+                    channel: 8.into(),
+                    note: 0x77.into(),
+                    value: 0x03.into(),
+                },
+                MidiEvent::KeyPressure {
+                    channel: 8.into(),
+                    note: 0x14.into(),
+                    value: 0x56.into(),
                 },
             ],
         );

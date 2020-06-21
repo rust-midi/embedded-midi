@@ -10,6 +10,11 @@ pub enum MidiEvent {
         note: Note,
         velocity: Value7,
     },
+    KeyPressure {
+        channel: Channel,
+        note: Note,
+        value: Value7,
+    },
     ControlChange {
         channel: Channel,
         control: Control,
