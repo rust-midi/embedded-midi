@@ -17,6 +17,8 @@ enum MidiParserState {
 
     ProgramChangeRecvd { channel: u8 },
 
+    ChannelPressureRecvd { channel: u8 },
+
     PitchBendRecvd { channel: u8 },
     PitchBendFirstByteRecvd { channel: u8, byte1: u8 },
 }
@@ -59,6 +61,10 @@ impl MidiParser {
                 }
                 0xC0 => {
                     self.state = MidiParserState::ProgramChangeRecvd { channel };
+                    None
+                }
+                0xD0 => {
+                    self.state = MidiParserState::ChannelPressureRecvd { channel };
                     None
                 }
                 0xE0 => {
@@ -121,6 +127,13 @@ impl MidiParser {
                     channel: channel.into(),
                     program: byte.into(),
                 }),
+
+                MidiParserState::ChannelPressureRecvd { channel } => {
+                    Some(MidiEvent::ChannelPressure {
+                        channel: channel.into(),
+                        value: byte.into(),
+                    })
+                }
 
                 MidiParserState::PitchBendRecvd { channel } => {
                     self.state = MidiParserState::PitchBendFirstByteRecvd {
@@ -291,6 +304,37 @@ mod tests {
                 MidiEvent::ProgramChange {
                     channel: 3.into(),
                     program: 0x01.into(),
+                },
+            ],
+        );
+    }
+
+    #[test]
+    fn should_parse_channel_pressure() {
+        MidiParser::new().assert_result(
+            &[0xDD, 0x37],
+            &[MidiEvent::ChannelPressure {
+                channel: 13.into(),
+                value: 0x37.into(),
+            }],
+        );
+    }
+
+    #[test]
+    fn should_parse_channel_pressure_running_state() {
+        MidiParser::new().assert_result(
+            &[
+                0xD6, 0x77, // First channel pressure
+                0x43, // Second channel pressure without status byte
+            ],
+            &[
+                MidiEvent::ChannelPressure {
+                    channel: 6.into(),
+                    value: 0x77.into(),
+                },
+                MidiEvent::ChannelPressure {
+                    channel: 6.into(),
+                    value: 0x43.into(),
                 },
             ],
         );

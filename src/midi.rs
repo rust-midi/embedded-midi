@@ -19,6 +19,10 @@ pub enum MidiEvent {
         channel: Channel,
         program: Program,
     },
+    ChannelPressure {
+        channel: Channel,
+        value: Value7,
+    },
     PitchBend {
         channel: Channel,
         value: Value14,
