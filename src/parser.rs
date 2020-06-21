@@ -1,4 +1,4 @@
-use crate::MidiEvent;
+use crate::{Channel, Control, MidiEvent, Note};
 
 pub struct MidiParser {
     state: MidiParserState,
@@ -6,32 +6,32 @@ pub struct MidiParser {
 
 enum MidiParserState {
     Idle,
-    NoteOnRecvd { channel: u8 },
-    NoteOnNoteRecvd { channel: u8, note: u8 },
+    NoteOnRecvd { channel: Channel },
+    NoteOnNoteRecvd { channel: Channel, note: Note },
 
-    NoteOffRecvd { channel: u8 },
-    NoteOffNoteRecvd { channel: u8, note: u8 },
+    NoteOffRecvd { channel: Channel },
+    NoteOffNoteRecvd { channel: Channel, note: Note },
 
-    KeyPressureRecvd { channel: u8 },
-    KeyPressureNoteRecvd { channel: u8, note: u8 },
+    KeyPressureRecvd { channel: Channel },
+    KeyPressureNoteRecvd { channel: Channel, note: Note },
 
-    ControlChangeRecvd { channel: u8 },
-    ControlChangeControlRecvd { channel: u8, control: u8 },
+    ControlChangeRecvd { channel: Channel },
+    ControlChangeControlRecvd { channel: Channel, control: Control },
 
-    ProgramChangeRecvd { channel: u8 },
+    ProgramChangeRecvd { channel: Channel },
 
-    ChannelPressureRecvd { channel: u8 },
+    ChannelPressureRecvd { channel: Channel },
 
-    PitchBendRecvd { channel: u8 },
-    PitchBendFirstByteRecvd { channel: u8, byte1: u8 },
+    PitchBendRecvd { channel: Channel },
+    PitchBendFirstByteRecvd { channel: Channel, byte1: u8 },
 }
 
 fn is_status_byte(byte: u8) -> bool {
     byte & 0x80 == 0x80
 }
 
-fn split_message_and_channel(byte: u8) -> (u8, u8) {
-    (byte & 0xf0u8, byte & 0x0fu8)
+fn split_message_and_channel(byte: u8) -> (u8, Channel) {
+    (byte & 0xf0u8, (byte & 0x0fu8).into())
 }
 
 impl MidiParser {
@@ -85,15 +85,15 @@ impl MidiParser {
                 MidiParserState::NoteOffRecvd { channel } => {
                     self.state = MidiParserState::NoteOffNoteRecvd {
                         channel,
-                        note: byte,
+                        note: byte.into(),
                     };
                     None
                 }
                 MidiParserState::NoteOffNoteRecvd { channel, note } => {
                     self.state = MidiParserState::NoteOffRecvd { channel };
                     Some(MidiEvent::NoteOff {
-                        channel: channel.into(),
-                        note: note.into(),
+                        channel,
+                        note,
                         velocity: byte.into(),
                     })
                 }
@@ -101,15 +101,15 @@ impl MidiParser {
                 MidiParserState::NoteOnRecvd { channel } => {
                     self.state = MidiParserState::NoteOnNoteRecvd {
                         channel,
-                        note: byte,
+                        note: byte.into(),
                     };
                     None
                 }
                 MidiParserState::NoteOnNoteRecvd { channel, note } => {
                     self.state = MidiParserState::NoteOnRecvd { channel };
                     Some(MidiEvent::NoteOn {
-                        channel: channel.into(),
-                        note: note.into(),
+                        channel,
+                        note,
                         velocity: byte.into(),
                     })
                 }
@@ -117,15 +117,15 @@ impl MidiParser {
                 MidiParserState::KeyPressureRecvd { channel } => {
                     self.state = MidiParserState::KeyPressureNoteRecvd {
                         channel,
-                        note: byte,
+                        note: byte.into(),
                     };
                     None
                 }
                 MidiParserState::KeyPressureNoteRecvd { channel, note } => {
                     self.state = MidiParserState::KeyPressureRecvd { channel };
                     Some(MidiEvent::KeyPressure {
-                        channel: channel.into(),
-                        note: note.into(),
+                        channel,
+                        note,
                         value: byte.into(),
                     })
                 }
@@ -133,27 +133,27 @@ impl MidiParser {
                 MidiParserState::ControlChangeRecvd { channel } => {
                     self.state = MidiParserState::ControlChangeControlRecvd {
                         channel,
-                        control: byte,
+                        control: byte.into(),
                     };
                     None
                 }
                 MidiParserState::ControlChangeControlRecvd { channel, control } => {
                     self.state = MidiParserState::ControlChangeRecvd { channel };
                     Some(MidiEvent::ControlChange {
-                        channel: channel.into(),
-                        control: control.into(),
+                        channel,
+                        control,
                         value: byte.into(),
                     })
                 }
 
                 MidiParserState::ProgramChangeRecvd { channel } => Some(MidiEvent::ProgramChange {
-                    channel: channel.into(),
+                    channel,
                     program: byte.into(),
                 }),
 
                 MidiParserState::ChannelPressureRecvd { channel } => {
                     Some(MidiEvent::ChannelPressure {
-                        channel: channel.into(),
+                        channel,
                         value: byte.into(),
                     })
                 }
@@ -168,7 +168,7 @@ impl MidiParser {
                 MidiParserState::PitchBendFirstByteRecvd { channel, byte1 } => {
                     self.state = MidiParserState::PitchBendRecvd { channel };
                     Some(MidiEvent::PitchBend {
-                        channel: channel.into(),
+                        channel,
                         value: (byte1, byte).into(),
                     })
                 }
@@ -196,7 +196,7 @@ mod tests {
     fn should_split_message_and_channel() {
         let (message, channel) = split_message_and_channel(0x91u8);
         assert_eq!(message, 0x90u8);
-        assert_eq!(channel, 1);
+        assert_eq!(channel, 1.into());
     }
 
     #[test]
