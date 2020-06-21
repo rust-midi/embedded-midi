@@ -119,7 +119,7 @@ impl MidiParser {
 
                 MidiParserState::ProgramChangeRecvd { channel } => Some(MidiEvent::ProgramChange {
                     channel: channel.into(),
-                    program: byte,
+                    program: byte.into(),
                 }),
 
                 MidiParserState::PitchBendRecvd { channel } => {
@@ -290,7 +290,7 @@ mod tests {
                 },
                 MidiEvent::ProgramChange {
                     channel: 3.into(),
-                    program: 0x01,
+                    program: 0x01.into(),
                 },
             ],
         );

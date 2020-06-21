@@ -17,7 +17,7 @@ pub enum MidiEvent {
     },
     ProgramChange {
         channel: Channel,
-        program: u8,
+        program: Program,
     },
     PitchBend {
         channel: Channel,
@@ -65,6 +65,21 @@ impl From<u8> for Control {
 }
 
 impl Into<u8> for Control {
+    fn into(self) -> u8 {
+        self.0
+    }
+}
+
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub struct Program(u8);
+
+impl From<u8> for Program {
+    fn from(value: u8) -> Self {
+        Program(value)
+    }
+}
+
+impl Into<u8> for Program {
     fn into(self) -> u8 {
         self.0
     }
