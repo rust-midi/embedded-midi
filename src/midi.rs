@@ -3,17 +3,17 @@ pub enum MidiEvent {
     NoteOn {
         channel: Channel,
         note: Note,
-        velocity: Velocity,
+        velocity: Value7,
     },
     NoteOff {
         channel: Channel,
         note: Note,
-        velocity: Velocity,
+        velocity: Value7,
     },
     ControlChange {
         channel: Channel,
         control: Control,
-        value: u8,
+        value: Value7,
     },
     ProgramChange {
         channel: Channel,

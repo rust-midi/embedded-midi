@@ -113,7 +113,7 @@ impl MidiParser {
                     Some(MidiEvent::ControlChange {
                         channel: channel.into(),
                         control: control.into(),
-                        value: byte,
+                        value: byte.into(),
                     })
                 }
 
@@ -238,7 +238,7 @@ mod tests {
             &[MidiEvent::ControlChange {
                 channel: 2.into(),
                 control: 0x76.into(),
-                value: 0x34,
+                value: 0x34.into(),
             }],
         );
     }
@@ -254,12 +254,12 @@ mod tests {
                 MidiEvent::ControlChange {
                     channel: 3.into(),
                     control: 0x3C.into(),
-                    value: 0x18,
+                    value: 0x18.into(),
                 },
                 MidiEvent::ControlChange {
                     channel: 3.into(),
                     control: 0x43.into(),
-                    value: 0x01,
+                    value: 0x01.into(),
                 },
             ],
         );
