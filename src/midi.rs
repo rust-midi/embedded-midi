@@ -1,11 +1,11 @@
 #[derive(Debug, PartialEq)]
 pub enum MidiEvent {
-    NoteOn {
+    NoteOff {
         channel: Channel,
         note: Note,
         velocity: Value7,
     },
-    NoteOff {
+    NoteOn {
         channel: Channel,
         note: Note,
         velocity: Value7,

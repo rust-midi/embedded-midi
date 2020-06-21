@@ -82,22 +82,6 @@ impl MidiParser {
             }
         } else {
             match self.state {
-                MidiParserState::NoteOnRecvd { channel } => {
-                    self.state = MidiParserState::NoteOnNoteRecvd {
-                        channel,
-                        note: byte,
-                    };
-                    None
-                }
-                MidiParserState::NoteOnNoteRecvd { channel, note } => {
-                    self.state = MidiParserState::NoteOnRecvd { channel };
-                    Some(MidiEvent::NoteOn {
-                        channel: channel.into(),
-                        note: note.into(),
-                        velocity: byte.into(),
-                    })
-                }
-
                 MidiParserState::NoteOffRecvd { channel } => {
                     self.state = MidiParserState::NoteOffNoteRecvd {
                         channel,
@@ -108,6 +92,22 @@ impl MidiParser {
                 MidiParserState::NoteOffNoteRecvd { channel, note } => {
                     self.state = MidiParserState::NoteOffRecvd { channel };
                     Some(MidiEvent::NoteOff {
+                        channel: channel.into(),
+                        note: note.into(),
+                        velocity: byte.into(),
+                    })
+                }
+
+                MidiParserState::NoteOnRecvd { channel } => {
+                    self.state = MidiParserState::NoteOnNoteRecvd {
+                        channel,
+                        note: byte,
+                    };
+                    None
+                }
+                MidiParserState::NoteOnNoteRecvd { channel, note } => {
+                    self.state = MidiParserState::NoteOnRecvd { channel };
+                    Some(MidiEvent::NoteOn {
                         channel: channel.into(),
                         note: note.into(),
                         velocity: byte.into(),
@@ -200,40 +200,6 @@ mod tests {
     }
 
     #[test]
-    fn should_parse_note_on() {
-        MidiParser::new().assert_result(
-            &[0x91, 0x04, 0x34],
-            &[MidiEvent::NoteOn {
-                channel: 1.into(),
-                note: 4.into(),
-                velocity: 0x34.into(),
-            }],
-        );
-    }
-
-    #[test]
-    fn should_handle_note_on_running_state() {
-        MidiParser::new().assert_result(
-            &[
-                0x92, 0x76, 0x34, // First note_on
-                0x33, 0x65, // Second note on without status byte
-            ],
-            &[
-                MidiEvent::NoteOn {
-                    channel: 2.into(),
-                    note: 0x76.into(),
-                    velocity: 0x34.into(),
-                },
-                MidiEvent::NoteOn {
-                    channel: 2.into(),
-                    note: 0x33.into(),
-                    velocity: 0x65.into(),
-                },
-            ],
-        );
-    }
-
-    #[test]
     fn should_parse_note_off() {
         MidiParser::new().assert_result(
             &[0x82, 0x76, 0x34],
@@ -259,6 +225,40 @@ mod tests {
                     velocity: 0x34.into(),
                 },
                 MidiEvent::NoteOff {
+                    channel: 2.into(),
+                    note: 0x33.into(),
+                    velocity: 0x65.into(),
+                },
+            ],
+        );
+    }
+
+    #[test]
+    fn should_parse_note_on() {
+        MidiParser::new().assert_result(
+            &[0x91, 0x04, 0x34],
+            &[MidiEvent::NoteOn {
+                channel: 1.into(),
+                note: 4.into(),
+                velocity: 0x34.into(),
+            }],
+        );
+    }
+
+    #[test]
+    fn should_handle_note_on_running_state() {
+        MidiParser::new().assert_result(
+            &[
+                0x92, 0x76, 0x34, // First note_on
+                0x33, 0x65, // Second note on without status byte
+            ],
+            &[
+                MidiEvent::NoteOn {
+                    channel: 2.into(),
+                    note: 0x76.into(),
+                    velocity: 0x34.into(),
+                },
+                MidiEvent::NoteOn {
                     channel: 2.into(),
                     note: 0x33.into(),
                     velocity: 0x65.into(),
