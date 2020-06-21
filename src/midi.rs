@@ -56,21 +56,6 @@ impl Into<u8> for Channel {
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
-pub struct Velocity(u8);
-
-impl From<u8> for Velocity {
-    fn from(velocity: u8) -> Self {
-        Velocity(velocity)
-    }
-}
-
-impl Into<u8> for Velocity {
-    fn into(self) -> u8 {
-        self.0
-    }
-}
-
-#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Control(u8);
 
 impl From<u8> for Control {

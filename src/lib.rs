@@ -9,7 +9,7 @@ mod midi;
 mod parser;
 
 use core::fmt::Debug;
-pub use midi::{Channel, MidiEvent, Note, Velocity};
+pub use midi::{Channel, MidiEvent, Note};
 pub use parser::MidiParser;
 
 pub struct MidiIn<RX> {
