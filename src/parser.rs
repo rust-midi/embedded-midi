@@ -63,6 +63,13 @@ impl MidiParser {
             } else if is_system_realtime(byte) {
                 match byte {
                     0xf8 => Some(MidiEvent::TimingClock),
+                    0xf9 => None, // Reserved
+                    0xfa => Some(MidiEvent::Start),
+                    0xfb => Some(MidiEvent::Continue),
+                    0xfc => Some(MidiEvent::Stop),
+                    0xfd => None, // Reserved
+                    0xfe => Some(MidiEvent::ActiveSensing),
+                    0xff => Some(MidiEvent::Reset),
                     _ => None,
                 }
             } else {
@@ -481,6 +488,121 @@ mod tests {
             ],
             &[
                 MidiEvent::TimingClock,
+                MidiEvent::ChannelPressure {
+                    channel: 6.into(),
+                    value: 0x77.into(),
+                },
+            ],
+        );
+    }
+
+    #[test]
+    fn should_parse_start_message() {
+        MidiParser::new().assert_result(&[0xfa], &[MidiEvent::Start]);
+    }
+
+    #[test]
+    fn should_parse_start_message_as_realtime() {
+        MidiParser::new().assert_result(
+            &[
+                0xD6, // Start channel pressure event
+                0xfa, // interupt with start
+                0x77, // Finish channel pressure
+            ],
+            &[
+                MidiEvent::Start,
+                MidiEvent::ChannelPressure {
+                    channel: 6.into(),
+                    value: 0x77.into(),
+                },
+            ],
+        );
+    }
+
+    #[test]
+    fn should_parse_continue_message() {
+        MidiParser::new().assert_result(&[0xfb], &[MidiEvent::Continue]);
+    }
+
+    #[test]
+    fn should_parse_continue_message_as_realtime() {
+        MidiParser::new().assert_result(
+            &[
+                0xD6, // Start channel pressure event
+                0xfb, // interupt with continue
+                0x77, // Finish channel pressure
+            ],
+            &[
+                MidiEvent::Continue,
+                MidiEvent::ChannelPressure {
+                    channel: 6.into(),
+                    value: 0x77.into(),
+                },
+            ],
+        );
+    }
+
+    #[test]
+    fn should_parse_stop_message() {
+        MidiParser::new().assert_result(&[0xfc], &[MidiEvent::Stop]);
+    }
+
+    #[test]
+    fn should_parse_stop_message_as_realtime() {
+        MidiParser::new().assert_result(
+            &[
+                0xD6, // Start channel pressure event
+                0xfc, // interupt with stop
+                0x77, // Finish channel pressure
+            ],
+            &[
+                MidiEvent::Stop,
+                MidiEvent::ChannelPressure {
+                    channel: 6.into(),
+                    value: 0x77.into(),
+                },
+            ],
+        );
+    }
+
+    #[test]
+    fn should_parse_activesensing_message() {
+        MidiParser::new().assert_result(&[0xfe], &[MidiEvent::ActiveSensing]);
+    }
+
+    #[test]
+    fn should_parse_activesensing_message_as_realtime() {
+        MidiParser::new().assert_result(
+            &[
+                0xD6, // Start channel pressure event
+                0xfe, // interupt with activesensing
+                0x77, // Finish channel pressure
+            ],
+            &[
+                MidiEvent::ActiveSensing,
+                MidiEvent::ChannelPressure {
+                    channel: 6.into(),
+                    value: 0x77.into(),
+                },
+            ],
+        );
+    }
+
+    #[test]
+    fn should_parse_reset_message() {
+        MidiParser::new().assert_result(&[0xff], &[MidiEvent::Reset]);
+    }
+
+    #[test]
+    fn should_parse_reset_message_as_realtime() {
+        MidiParser::new().assert_result(
+            &[
+                0xD6, // Start channel pressure event
+                0xff, // interupt with reset
+                0x77, // Finish channel pressure
+            ],
+            &[
+                MidiEvent::Reset,
                 MidiEvent::ChannelPressure {
                     channel: 6.into(),
                     value: 0x77.into(),

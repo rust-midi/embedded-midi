@@ -34,6 +34,11 @@ pub enum MidiEvent {
     },
 
     TimingClock,
+    Start,
+    Continue,
+    Stop,
+    ActiveSensing,
+    Reset,
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
