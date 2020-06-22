@@ -58,38 +58,46 @@ impl MidiParser {
     /// and returns none.
     pub fn parse_byte(&mut self, byte: u8) -> Option<MidiEvent> {
         if is_status_byte(byte) {
-            let (message, channel) = split_message_and_channel(byte);
+            if is_system_common(byte) {
+                None
+            } else if is_system_realtime(byte) {
+                None
+            } else {
+                // Channel voice message
 
-            match message {
-                0x80 => {
-                    self.state = MidiParserState::NoteOffRecvd { channel };
-                    None
+                let (message, channel) = split_message_and_channel(byte);
+
+                match message {
+                    0x80 => {
+                        self.state = MidiParserState::NoteOffRecvd { channel };
+                        None
+                    }
+                    0x90 => {
+                        self.state = MidiParserState::NoteOnRecvd { channel };
+                        None
+                    }
+                    0xA0 => {
+                        self.state = MidiParserState::KeyPressureRecvd { channel };
+                        None
+                    }
+                    0xB0 => {
+                        self.state = MidiParserState::ControlChangeRecvd { channel };
+                        None
+                    }
+                    0xC0 => {
+                        self.state = MidiParserState::ProgramChangeRecvd { channel };
+                        None
+                    }
+                    0xD0 => {
+                        self.state = MidiParserState::ChannelPressureRecvd { channel };
+                        None
+                    }
+                    0xE0 => {
+                        self.state = MidiParserState::PitchBendRecvd { channel };
+                        None
+                    }
+                    _ => None,
                 }
-                0x90 => {
-                    self.state = MidiParserState::NoteOnRecvd { channel };
-                    None
-                }
-                0xA0 => {
-                    self.state = MidiParserState::KeyPressureRecvd { channel };
-                    None
-                }
-                0xB0 => {
-                    self.state = MidiParserState::ControlChangeRecvd { channel };
-                    None
-                }
-                0xC0 => {
-                    self.state = MidiParserState::ProgramChangeRecvd { channel };
-                    None
-                }
-                0xD0 => {
-                    self.state = MidiParserState::ChannelPressureRecvd { channel };
-                    None
-                }
-                0xE0 => {
-                    self.state = MidiParserState::PitchBendRecvd { channel };
-                    None
-                }
-                _ => None,
             }
         } else {
             match self.state {
