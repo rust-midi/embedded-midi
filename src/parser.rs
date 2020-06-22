@@ -472,6 +472,24 @@ mod tests {
     }
 
     #[test]
+    fn should_parse_timingclock_message_as_realtime() {
+        MidiParser::new().assert_result(
+            &[
+                0xD6, // Start channel pressure event
+                0xf8, // interupt with midi timing clock
+                0x77, // Finish channel pressure
+            ],
+            &[
+                MidiEvent::TimingClock,
+                MidiEvent::ChannelPressure {
+                    channel: 6.into(),
+                    value: 0x77.into(),
+                },
+            ],
+        );
+    }
+
+    #[test]
     fn should_ignore_incomplete_messages() {
         MidiParser::new().assert_result(
             &[
