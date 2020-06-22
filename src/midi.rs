@@ -32,6 +32,8 @@ pub enum MidiEvent {
         channel: Channel,
         value: Value14,
     },
+
+    TimingClock,
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]

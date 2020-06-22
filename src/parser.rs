@@ -61,7 +61,10 @@ impl MidiParser {
             if is_system_common(byte) {
                 None
             } else if is_system_realtime(byte) {
-                None
+                match byte {
+                    0xf8 => Some(MidiEvent::TimingClock),
+                    _ => None,
+                }
             } else {
                 // Channel voice message
 
@@ -461,6 +464,11 @@ mod tests {
                 },
             ],
         );
+    }
+
+    #[test]
+    fn should_parse_timingclock_message() {
+        MidiParser::new().assert_result(&[0xf8], &[MidiEvent::TimingClock]);
     }
 
     #[test]
