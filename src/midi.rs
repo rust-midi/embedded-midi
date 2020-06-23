@@ -1,5 +1,9 @@
+//! This module contains data types to represent the different messages that can be sent over MIDI.
+
+/// An enum with variants for all possible Midi messages.
 #[derive(Debug, PartialEq)]
 pub enum MidiEvent {
+    // Channel voice messages
     NoteOff {
         channel: Channel,
         note: Note,
@@ -33,6 +37,9 @@ pub enum MidiEvent {
         value: Value14,
     },
 
+    // System common messages
+
+    // System real time messages
     TimingClock,
     Start,
     Continue,
@@ -41,6 +48,7 @@ pub enum MidiEvent {
     Reset,
 }
 
+/// Represents a midi note
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Note(u8);
 
@@ -56,6 +64,8 @@ impl Into<u8> for Note {
     }
 }
 
+/// Represents a Midi channel, Midi channels can range from 0 to 15, but are represented as 1 based
+/// values Channel 1 to 16
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Channel(u8);
 
@@ -71,6 +81,7 @@ impl Into<u8> for Channel {
     }
 }
 
+/// A Midi controller number
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Control(u8);
 
@@ -86,6 +97,7 @@ impl Into<u8> for Control {
     }
 }
 
+/// A Midi program number, these usually correspond to presets on Midi devices
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Program(u8);
 
@@ -101,6 +113,7 @@ impl Into<u8> for Program {
     }
 }
 
+/// A 7 bit Midi data value stored in an unsigned 8 bit integer, the msb is always 0
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Value7(u8);
 
@@ -116,6 +129,8 @@ impl Into<u8> for Value7 {
     }
 }
 
+/// A 14 bit Midi value stored as two 7 bit Midi data values, where the msb is always 0 to signify
+/// that this is a data value.
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Value14(u8, u8);
 
