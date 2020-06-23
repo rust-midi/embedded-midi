@@ -63,39 +63,47 @@ impl MidiParser {
         if is_status_byte(byte) {
             if is_system_common(byte) {
                 match byte {
-                    0xf0 => {  // System exclusive
+                    0xf0 => {
+                        // System exclusive
                         self.state = MidiParserState::Idle;
                         None
                     }
-                    0xf1 => {  // Midi time code quarter frame
+                    0xf1 => {
+                        // Midi time code quarter frame
                         self.state = MidiParserState::Idle;
                         None
                     }
-                    0xf2 => {  // Song position pointer
+                    0xf2 => {
+                        // Song position pointer
                         self.state = MidiParserState::Idle;
                         None
                     }
-                    0xf3 => {  // Song select
+                    0xf3 => {
+                        // Song select
                         self.state = MidiParserState::Idle;
                         None
                     }
-                    0xf4 => {  // Undefined
+                    0xf4 => {
+                        // Undefined
                         self.state = MidiParserState::Idle;
                         None
                     }
-                    0xf5 => {  // Undefined
+                    0xf5 => {
+                        // Undefined
                         self.state = MidiParserState::Idle;
                         None
                     }
-                    0xf6 => {  // Tune request
+                    0xf6 => {
+                        // Tune request
                         self.state = MidiParserState::Idle;
                         None
                     }
-                    0xf7 => {  // End of exclusive
+                    0xf7 => {
+                        // End of exclusive
                         self.state = MidiParserState::Idle;
                         None
                     }
-                    _ => None
+                    _ => None,
                 }
             } else if is_system_realtime(byte) {
                 match byte {
@@ -233,7 +241,7 @@ impl MidiParser {
                 }
                 MidiParserState::PitchBendFirstByteRecvd { channel, byte1 } => {
                     self.state = MidiParserState::PitchBendRecvd { channel };
-                    Some(MidiEvent::PitchBend {
+                    Some(MidiEvent::PitchBendChange {
                         channel,
                         value: (byte1, byte).into(),
                     })
@@ -483,7 +491,7 @@ mod tests {
     fn should_parse_pitchbend() {
         MidiParser::new().assert_result(
             &[0xE8, 0x14, 0x56],
-            &[MidiEvent::PitchBend {
+            &[MidiEvent::PitchBendChange {
                 channel: 8.into(),
                 value: (0x14, 0x56).into(),
             }],
@@ -498,11 +506,11 @@ mod tests {
                 0x43, 0x01, // Second pitchbend without status byte
             ],
             &[
-                MidiEvent::PitchBend {
+                MidiEvent::PitchBendChange {
                     channel: 3.into(),
                     value: (0x3C, 0x18).into(),
                 },
-                MidiEvent::PitchBend {
+                MidiEvent::PitchBendChange {
                     channel: 3.into(),
                     value: (0x43, 0x01).into(),
                 },

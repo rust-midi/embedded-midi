@@ -32,7 +32,7 @@ pub enum MidiEvent {
         channel: Channel,
         value: Value7,
     },
-    PitchBend {
+    PitchBendChange {
         channel: Channel,
         value: Value14,
     },
