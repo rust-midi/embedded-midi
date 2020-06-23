@@ -26,25 +26,28 @@ enum MidiParserState {
     PitchBendFirstByteRecvd { channel: Channel, byte1: u8 },
 }
 
+/// Check if most significant bit is set which signifies a Midi status byte
 fn is_status_byte(byte: u8) -> bool {
-    // Check if most significant bit is set
     byte & 0x80 == 0x80
 }
 
+/// Check if the byte corresponds to 0x11110xxx which signifies a system common message
 fn is_system_common(byte: u8) -> bool {
-    // Check if the byte corresponds to 0x11110xxx
     byte & 0xf8 == 0xf0
 }
 
+/// Check if the byte corresponds to 0x11111xxx which signifies a system realtime message
 fn is_system_realtime(byte: u8) -> bool {
-    // Check if the byte corresponds to 0x11111xxx
     byte & 0xf8 == 0xf8
 }
 
+/// Split the message and channel part of a channel voice message
 fn split_message_and_channel(byte: u8) -> (u8, Channel) {
     (byte & 0xf0u8, (byte & 0x0fu8).into())
 }
 
+/// State machine for parsing Midi data, can be fed bytes one-by-one, and returns parsed Midi
+/// messages whenever one is completed.
 impl MidiParser {
     /// Initialize midiparser state
     pub fn new() -> Self {
