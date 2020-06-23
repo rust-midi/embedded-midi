@@ -59,7 +59,41 @@ impl MidiParser {
     pub fn parse_byte(&mut self, byte: u8) -> Option<MidiEvent> {
         if is_status_byte(byte) {
             if is_system_common(byte) {
-                None
+                match byte {
+                    0xf0 => {  // System exclusive
+                        self.state = MidiParserState::Idle;
+                        None
+                    }
+                    0xf1 => {  // Midi time code quarter frame
+                        self.state = MidiParserState::Idle;
+                        None
+                    }
+                    0xf2 => {  // Song position pointer
+                        self.state = MidiParserState::Idle;
+                        None
+                    }
+                    0xf3 => {  // Song select
+                        self.state = MidiParserState::Idle;
+                        None
+                    }
+                    0xf4 => {  // Undefined
+                        self.state = MidiParserState::Idle;
+                        None
+                    }
+                    0xf5 => {  // Undefined
+                        self.state = MidiParserState::Idle;
+                        None
+                    }
+                    0xf6 => {  // Tune request
+                        self.state = MidiParserState::Idle;
+                        None
+                    }
+                    0xf7 => {  // End of exclusive
+                        self.state = MidiParserState::Idle;
+                        None
+                    }
+                    _ => None
+                }
             } else if is_system_realtime(byte) {
                 match byte {
                     0xf8 => Some(MidiEvent::TimingClock),
