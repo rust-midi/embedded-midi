@@ -4,7 +4,6 @@
 use embedded_hal::serial;
 use nb::block;
 
-mod error;
 mod midi;
 mod parser;
 
