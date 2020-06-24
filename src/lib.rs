@@ -1,6 +1,7 @@
 //! *Midi driver on top of embedded hal serial communications*
 //!
 #![no_std]
+#[warn(missing_debug_implementations, missing_docs)]
 use embedded_hal::serial;
 use nb::block;
 
