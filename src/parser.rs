@@ -36,16 +36,6 @@ fn is_system_message(byte: u8) -> bool {
     byte & 0xf0 == 0xf0
 }
 
-/// Check if the byte corresponds to 0x11110xxx which signifies a system common message
-fn is_system_common(byte: u8) -> bool {
-    byte & 0xf8 == 0xf0
-}
-
-/// Check if the byte corresponds to 0x11111xxx which signifies a system realtime message
-fn is_system_realtime(byte: u8) -> bool {
-    byte & 0xf8 == 0xf8
-}
-
 /// Split the message and channel part of a channel voice message
 fn split_message_and_channel(byte: u8) -> (u8, Channel) {
     (byte & 0xf0u8, (byte & 0x0fu8).into())
@@ -66,8 +56,9 @@ impl MidiParser {
     /// and returns none.
     pub fn parse_byte(&mut self, byte: u8) -> Option<MidiEvent> {
         if is_status_byte(byte) {
-            if is_system_common(byte) {
+            if is_system_message(byte) {
                 match byte {
+                    // System common messages, these should reset parsing other messages
                     0xf0 => {
                         // System exclusive
                         self.state = MidiParserState::Idle;
@@ -108,10 +99,8 @@ impl MidiParser {
                         self.state = MidiParserState::Idle;
                         None
                     }
-                    _ => None,
-                }
-            } else if is_system_realtime(byte) {
-                match byte {
+
+                    // System realtime messages
                     0xf8 => Some(MidiEvent::TimingClock),
                     0xf9 => None, // Reserved
                     0xfa => Some(MidiEvent::Start),
@@ -120,6 +109,7 @@ impl MidiParser {
                     0xfd => None, // Reserved
                     0xfe => Some(MidiEvent::ActiveSensing),
                     0xff => Some(MidiEvent::Reset),
+
                     _ => None,
                 }
             } else {
@@ -277,22 +267,6 @@ mod tests {
         assert!(is_system_message(0xf4));
         assert!(!is_system_message(0x0f));
         assert!(!is_system_message(0x77));
-    }
-
-    #[test]
-    fn should_parse_system_common() {
-        assert!(is_system_common(0xf0));
-        assert!(is_system_common(0xf4));
-        assert!(!is_system_common(0xf8));
-        assert!(!is_system_common(0x78));
-    }
-
-    #[test]
-    fn should_parse_system_realtime() {
-        assert!(is_system_realtime(0xf8));
-        assert!(is_system_realtime(0xfA));
-        assert!(!is_system_realtime(0xf7));
-        assert!(!is_system_realtime(0x78));
     }
 
     #[test]
