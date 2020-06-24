@@ -31,6 +31,11 @@ fn is_status_byte(byte: u8) -> bool {
     byte & 0x80 == 0x80
 }
 
+/// Check if a byte corresponds to 0x1111xxxx which signifies either a system common or realtime message
+fn is_system_message(byte: u8) -> bool {
+    byte & 0xf0 == 0xf0
+}
+
 /// Check if the byte corresponds to 0x11110xxx which signifies a system common message
 fn is_system_common(byte: u8) -> bool {
     byte & 0xf8 == 0xf0
@@ -264,6 +269,14 @@ mod tests {
         assert!(is_status_byte(0x94u8));
         assert!(!is_status_byte(0x00u8));
         assert!(!is_status_byte(0x78u8));
+    }
+
+    #[test]
+    fn should_parse_system_message() {
+        assert!(is_system_message(0xf0));
+        assert!(is_system_message(0xf4));
+        assert!(!is_system_message(0x0f));
+        assert!(!is_system_message(0x77));
     }
 
     #[test]
