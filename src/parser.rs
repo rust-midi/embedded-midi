@@ -215,10 +215,12 @@ impl MidiParser {
                     })
                 }
 
-                MidiParserState::ProgramChangeRecvd { channel } => Some(MidiMessage::ProgramChange {
-                    channel,
-                    program: byte.into(),
-                }),
+                MidiParserState::ProgramChangeRecvd { channel } => {
+                    Some(MidiMessage::ProgramChange {
+                        channel,
+                        program: byte.into(),
+                    })
+                }
 
                 MidiParserState::ChannelPressureRecvd { channel } => {
                     Some(MidiMessage::ChannelPressure {
