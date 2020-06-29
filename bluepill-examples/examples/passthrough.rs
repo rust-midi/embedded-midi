@@ -16,7 +16,6 @@ use panic_semihosting;
 
 #[entry]
 fn main() -> ! {
-    // let cp = cortex_m::Peripherals::take().unwrap();
     let dp = pac::Peripherals::take().unwrap();
 
     // Configure the clock
