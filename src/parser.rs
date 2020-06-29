@@ -1,4 +1,4 @@
-use crate::{Channel, Control, MidiEvent, Note};
+use crate::{Channel, Control, MidiMessage, Note};
 
 pub struct MidiParser {
     state: MidiParserState,
@@ -54,7 +54,7 @@ impl MidiParser {
     /// Parse midi event byte by byte. Call this whenever a byte is received. When a midi-event is
     /// completed it is returned, otherwise this method updates the internal midiparser state and
     /// and returns none.
-    pub fn parse_byte(&mut self, byte: u8) -> Option<MidiEvent> {
+    pub fn parse_byte(&mut self, byte: u8) -> Option<MidiMessage> {
         if is_status_byte(byte) {
             if is_system_message(byte) {
                 match byte {
@@ -101,14 +101,14 @@ impl MidiParser {
                     }
 
                     // System realtime messages
-                    0xf8 => Some(MidiEvent::TimingClock),
+                    0xf8 => Some(MidiMessage::TimingClock),
                     0xf9 => None, // Reserved
-                    0xfa => Some(MidiEvent::Start),
-                    0xfb => Some(MidiEvent::Continue),
-                    0xfc => Some(MidiEvent::Stop),
+                    0xfa => Some(MidiMessage::Start),
+                    0xfb => Some(MidiMessage::Continue),
+                    0xfc => Some(MidiMessage::Stop),
                     0xfd => None, // Reserved
-                    0xfe => Some(MidiEvent::ActiveSensing),
-                    0xff => Some(MidiEvent::Reset),
+                    0xfe => Some(MidiMessage::ActiveSensing),
+                    0xff => Some(MidiMessage::Reset),
 
                     _ => None,
                 }
@@ -160,7 +160,7 @@ impl MidiParser {
                 }
                 MidiParserState::NoteOffNoteRecvd { channel, note } => {
                     self.state = MidiParserState::NoteOffRecvd { channel };
-                    Some(MidiEvent::NoteOff {
+                    Some(MidiMessage::NoteOff {
                         channel,
                         note,
                         velocity: byte.into(),
@@ -176,7 +176,7 @@ impl MidiParser {
                 }
                 MidiParserState::NoteOnNoteRecvd { channel, note } => {
                     self.state = MidiParserState::NoteOnRecvd { channel };
-                    Some(MidiEvent::NoteOn {
+                    Some(MidiMessage::NoteOn {
                         channel,
                         note,
                         velocity: byte.into(),
@@ -192,7 +192,7 @@ impl MidiParser {
                 }
                 MidiParserState::KeyPressureNoteRecvd { channel, note } => {
                     self.state = MidiParserState::KeyPressureRecvd { channel };
-                    Some(MidiEvent::KeyPressure {
+                    Some(MidiMessage::KeyPressure {
                         channel,
                         note,
                         value: byte.into(),
@@ -208,20 +208,20 @@ impl MidiParser {
                 }
                 MidiParserState::ControlChangeControlRecvd { channel, control } => {
                     self.state = MidiParserState::ControlChangeRecvd { channel };
-                    Some(MidiEvent::ControlChange {
+                    Some(MidiMessage::ControlChange {
                         channel,
                         control,
                         value: byte.into(),
                     })
                 }
 
-                MidiParserState::ProgramChangeRecvd { channel } => Some(MidiEvent::ProgramChange {
+                MidiParserState::ProgramChangeRecvd { channel } => Some(MidiMessage::ProgramChange {
                     channel,
                     program: byte.into(),
                 }),
 
                 MidiParserState::ChannelPressureRecvd { channel } => {
-                    Some(MidiEvent::ChannelPressure {
+                    Some(MidiMessage::ChannelPressure {
                         channel,
                         value: byte.into(),
                     })
@@ -236,7 +236,7 @@ impl MidiParser {
                 }
                 MidiParserState::PitchBendFirstByteRecvd { channel, byte1 } => {
                     self.state = MidiParserState::PitchBendRecvd { channel };
-                    Some(MidiEvent::PitchBendChange {
+                    Some(MidiMessage::PitchBendChange {
                         channel,
                         value: (byte1, byte).into(),
                     })
@@ -280,7 +280,7 @@ mod tests {
     fn should_parse_note_off() {
         MidiParser::new().assert_result(
             &[0x82, 0x76, 0x34],
-            &[MidiEvent::NoteOff {
+            &[MidiMessage::NoteOff {
                 channel: 2.into(),
                 note: 0x76.into(),
                 velocity: 0x34.into(),
@@ -296,12 +296,12 @@ mod tests {
                 0x33, 0x65, // Second note_off without status byte
             ],
             &[
-                MidiEvent::NoteOff {
+                MidiMessage::NoteOff {
                     channel: 2.into(),
                     note: 0x76.into(),
                     velocity: 0x34.into(),
                 },
-                MidiEvent::NoteOff {
+                MidiMessage::NoteOff {
                     channel: 2.into(),
                     note: 0x33.into(),
                     velocity: 0x65.into(),
@@ -314,7 +314,7 @@ mod tests {
     fn should_parse_note_on() {
         MidiParser::new().assert_result(
             &[0x91, 0x04, 0x34],
-            &[MidiEvent::NoteOn {
+            &[MidiMessage::NoteOn {
                 channel: 1.into(),
                 note: 4.into(),
                 velocity: 0x34.into(),
@@ -330,12 +330,12 @@ mod tests {
                 0x33, 0x65, // Second note on without status byte
             ],
             &[
-                MidiEvent::NoteOn {
+                MidiMessage::NoteOn {
                     channel: 2.into(),
                     note: 0x76.into(),
                     velocity: 0x34.into(),
                 },
-                MidiEvent::NoteOn {
+                MidiMessage::NoteOn {
                     channel: 2.into(),
                     note: 0x33.into(),
                     velocity: 0x65.into(),
@@ -348,7 +348,7 @@ mod tests {
     fn should_parse_keypressure() {
         MidiParser::new().assert_result(
             &[0xAA, 0x13, 0x34],
-            &[MidiEvent::KeyPressure {
+            &[MidiMessage::KeyPressure {
                 channel: 10.into(),
                 note: 0x13.into(),
                 value: 0x34.into(),
@@ -364,12 +364,12 @@ mod tests {
                 0x14, 0x56, // Second key_pressure without status byte
             ],
             &[
-                MidiEvent::KeyPressure {
+                MidiMessage::KeyPressure {
                     channel: 8.into(),
                     note: 0x77.into(),
                     value: 0x03.into(),
                 },
-                MidiEvent::KeyPressure {
+                MidiMessage::KeyPressure {
                     channel: 8.into(),
                     note: 0x14.into(),
                     value: 0x56.into(),
@@ -382,7 +382,7 @@ mod tests {
     fn should_parse_control_change() {
         MidiParser::new().assert_result(
             &[0xB2, 0x76, 0x34],
-            &[MidiEvent::ControlChange {
+            &[MidiMessage::ControlChange {
                 channel: 2.into(),
                 control: 0x76.into(),
                 value: 0x34.into(),
@@ -398,12 +398,12 @@ mod tests {
                 0x43, 0x01, // Second control change without status byte
             ],
             &[
-                MidiEvent::ControlChange {
+                MidiMessage::ControlChange {
                     channel: 3.into(),
                     control: 0x3C.into(),
                     value: 0x18.into(),
                 },
-                MidiEvent::ControlChange {
+                MidiMessage::ControlChange {
                     channel: 3.into(),
                     control: 0x43.into(),
                     value: 0x01.into(),
@@ -416,7 +416,7 @@ mod tests {
     fn should_parse_program_change() {
         MidiParser::new().assert_result(
             &[0xC9, 0x15],
-            &[MidiEvent::ProgramChange {
+            &[MidiMessage::ProgramChange {
                 channel: 9.into(),
                 program: 0x15.into(),
             }],
@@ -431,11 +431,11 @@ mod tests {
                 0x01, // Second program change without status byte
             ],
             &[
-                MidiEvent::ProgramChange {
+                MidiMessage::ProgramChange {
                     channel: 3.into(),
                     program: 0x67.into(),
                 },
-                MidiEvent::ProgramChange {
+                MidiMessage::ProgramChange {
                     channel: 3.into(),
                     program: 0x01.into(),
                 },
@@ -447,7 +447,7 @@ mod tests {
     fn should_parse_channel_pressure() {
         MidiParser::new().assert_result(
             &[0xDD, 0x37],
-            &[MidiEvent::ChannelPressure {
+            &[MidiMessage::ChannelPressure {
                 channel: 13.into(),
                 value: 0x37.into(),
             }],
@@ -462,11 +462,11 @@ mod tests {
                 0x43, // Second channel pressure without status byte
             ],
             &[
-                MidiEvent::ChannelPressure {
+                MidiMessage::ChannelPressure {
                     channel: 6.into(),
                     value: 0x77.into(),
                 },
-                MidiEvent::ChannelPressure {
+                MidiMessage::ChannelPressure {
                     channel: 6.into(),
                     value: 0x43.into(),
                 },
@@ -478,7 +478,7 @@ mod tests {
     fn should_parse_pitchbend() {
         MidiParser::new().assert_result(
             &[0xE8, 0x14, 0x56],
-            &[MidiEvent::PitchBendChange {
+            &[MidiMessage::PitchBendChange {
                 channel: 8.into(),
                 value: (0x14, 0x56).into(),
             }],
@@ -493,11 +493,11 @@ mod tests {
                 0x43, 0x01, // Second pitchbend without status byte
             ],
             &[
-                MidiEvent::PitchBendChange {
+                MidiMessage::PitchBendChange {
                     channel: 3.into(),
                     value: (0x3C, 0x18).into(),
                 },
-                MidiEvent::PitchBendChange {
+                MidiMessage::PitchBendChange {
                     channel: 3.into(),
                     value: (0x43, 0x01).into(),
                 },
@@ -507,7 +507,7 @@ mod tests {
 
     #[test]
     fn should_parse_timingclock_message() {
-        MidiParser::new().assert_result(&[0xf8], &[MidiEvent::TimingClock]);
+        MidiParser::new().assert_result(&[0xf8], &[MidiMessage::TimingClock]);
     }
 
     #[test]
@@ -519,8 +519,8 @@ mod tests {
                 0x77, // Finish channel pressure
             ],
             &[
-                MidiEvent::TimingClock,
-                MidiEvent::ChannelPressure {
+                MidiMessage::TimingClock,
+                MidiMessage::ChannelPressure {
                     channel: 6.into(),
                     value: 0x77.into(),
                 },
@@ -530,7 +530,7 @@ mod tests {
 
     #[test]
     fn should_parse_start_message() {
-        MidiParser::new().assert_result(&[0xfa], &[MidiEvent::Start]);
+        MidiParser::new().assert_result(&[0xfa], &[MidiMessage::Start]);
     }
 
     #[test]
@@ -542,8 +542,8 @@ mod tests {
                 0x77, // Finish channel pressure
             ],
             &[
-                MidiEvent::Start,
-                MidiEvent::ChannelPressure {
+                MidiMessage::Start,
+                MidiMessage::ChannelPressure {
                     channel: 6.into(),
                     value: 0x77.into(),
                 },
@@ -553,7 +553,7 @@ mod tests {
 
     #[test]
     fn should_parse_continue_message() {
-        MidiParser::new().assert_result(&[0xfb], &[MidiEvent::Continue]);
+        MidiParser::new().assert_result(&[0xfb], &[MidiMessage::Continue]);
     }
 
     #[test]
@@ -565,8 +565,8 @@ mod tests {
                 0x77, // Finish channel pressure
             ],
             &[
-                MidiEvent::Continue,
-                MidiEvent::ChannelPressure {
+                MidiMessage::Continue,
+                MidiMessage::ChannelPressure {
                     channel: 6.into(),
                     value: 0x77.into(),
                 },
@@ -576,7 +576,7 @@ mod tests {
 
     #[test]
     fn should_parse_stop_message() {
-        MidiParser::new().assert_result(&[0xfc], &[MidiEvent::Stop]);
+        MidiParser::new().assert_result(&[0xfc], &[MidiMessage::Stop]);
     }
 
     #[test]
@@ -588,8 +588,8 @@ mod tests {
                 0x77, // Finish channel pressure
             ],
             &[
-                MidiEvent::Stop,
-                MidiEvent::ChannelPressure {
+                MidiMessage::Stop,
+                MidiMessage::ChannelPressure {
                     channel: 6.into(),
                     value: 0x77.into(),
                 },
@@ -599,7 +599,7 @@ mod tests {
 
     #[test]
     fn should_parse_activesensing_message() {
-        MidiParser::new().assert_result(&[0xfe], &[MidiEvent::ActiveSensing]);
+        MidiParser::new().assert_result(&[0xfe], &[MidiMessage::ActiveSensing]);
     }
 
     #[test]
@@ -611,8 +611,8 @@ mod tests {
                 0x77, // Finish channel pressure
             ],
             &[
-                MidiEvent::ActiveSensing,
-                MidiEvent::ChannelPressure {
+                MidiMessage::ActiveSensing,
+                MidiMessage::ChannelPressure {
                     channel: 6.into(),
                     value: 0x77.into(),
                 },
@@ -622,7 +622,7 @@ mod tests {
 
     #[test]
     fn should_parse_reset_message() {
-        MidiParser::new().assert_result(&[0xff], &[MidiEvent::Reset]);
+        MidiParser::new().assert_result(&[0xff], &[MidiMessage::Reset]);
     }
 
     #[test]
@@ -634,8 +634,8 @@ mod tests {
                 0x77, // Finish channel pressure
             ],
             &[
-                MidiEvent::Reset,
-                MidiEvent::ChannelPressure {
+                MidiMessage::Reset,
+                MidiMessage::ChannelPressure {
                     channel: 6.into(),
                     value: 0x77.into(),
                 },
@@ -650,7 +650,7 @@ mod tests {
                 0x92, 0x1b, // Start note off message
                 0x82, 0x76, 0x34, // continue with a complete note on message
             ],
-            &[MidiEvent::NoteOff {
+            &[MidiMessage::NoteOff {
                 channel: 2.into(),
                 note: 0x76.into(),
                 velocity: 0x34.into(),
@@ -660,8 +660,8 @@ mod tests {
 
     impl MidiParser {
         /// Test helper function, asserts if a slice of bytes parses to some set of midi events
-        fn assert_result(&mut self, bytes: &[u8], expected_events: &[MidiEvent]) {
-            let events: Vec<MidiEvent> = bytes
+        fn assert_result(&mut self, bytes: &[u8], expected_events: &[MidiMessage]) {
+            let events: Vec<MidiMessage> = bytes
                 .into_iter()
                 .filter_map(|byte| self.parse_byte(*byte))
                 .collect();

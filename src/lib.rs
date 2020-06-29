@@ -9,7 +9,7 @@ mod midi;
 mod parser;
 
 use core::fmt::Debug;
-pub use midi::{Channel, Control, MidiEvent, Note, Program};
+pub use midi::{Channel, Control, MidiMessage, Note, Program};
 pub use parser::MidiParser;
 
 pub struct MidiIn<RX> {
@@ -29,7 +29,7 @@ where
         }
     }
 
-    pub fn read(&mut self) -> nb::Result<MidiEvent, E> {
+    pub fn read(&mut self) -> nb::Result<MidiMessage, E> {
         let byte = self.rx.read()?;
 
         match self.parser.parse_byte(byte) {
@@ -52,9 +52,9 @@ where
         MidiOut { tx }
     }
 
-    pub fn write(&mut self, event: MidiEvent) -> Result<(), E> {
+    pub fn write(&mut self, event: MidiMessage) -> Result<(), E> {
         match event {
-            MidiEvent::NoteOn {
+            MidiMessage::NoteOn {
                 channel,
                 note,
                 velocity,
@@ -64,7 +64,7 @@ where
                 block!(self.tx.write(note.into()))?;
                 block!(self.tx.write(velocity.into()))?;
             }
-            MidiEvent::NoteOff {
+            MidiMessage::NoteOff {
                 channel,
                 note,
                 velocity,

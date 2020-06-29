@@ -2,7 +2,7 @@
 
 /// An enum with variants for all possible Midi messages.
 #[derive(Debug, PartialEq)]
-pub enum MidiEvent {
+pub enum MidiMessage {
     // Channel voice messages
     NoteOff {
         channel: Channel,
