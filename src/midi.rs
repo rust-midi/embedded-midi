@@ -4,51 +4,106 @@
 #[derive(Debug, PartialEq)]
 pub enum MidiMessage {
     // Channel voice messages
+
+    /// Note Off message
     NoteOff {
+        /// Channel can be 0 to 15 for Midi channels 1 to 16
         channel: Channel,
+
+        /// The note number
         note: Note,
+
+        /// Note off velocity
         velocity: Value7,
     },
+
+    /// Note on message
     NoteOn {
+        /// Channel can be 0 to 15 for Midi channels 1 to 16
         channel: Channel,
+
+        /// The note number
         note: Note,
+
+        /// Note on velocity
         velocity: Value7,
     },
+
+    /// KeyPressure message for polyphonic aftertouch
     KeyPressure {
+        /// Channel can be 0 to 15 for Midi channels 1 to 16
         channel: Channel,
+
+        /// The note number
         note: Note,
+
+        /// The keypressure value
         value: Value7,
     },
+
+    /// Control change message
     ControlChange {
+        /// Channel can be 0 to 15 for Midi channels 1 to 16
         channel: Channel,
+
+        /// The control number
         control: Control,
+
+        /// The control value
         value: Value7,
     },
+
+    /// Program change message
     ProgramChange {
+        /// Channel can be 0 to 15 for Midi channels 1 to 16
         channel: Channel,
+
+        /// The program number
         program: Program,
     },
+
+    /// Channel pressure message for channel aftertouch
     ChannelPressure {
+        /// Channel can be 0 to 15 for Midi channels 1 to 16
         channel: Channel,
+
+        /// The pressure value
         value: Value7,
     },
+
+    /// Pitch bend message
     PitchBendChange {
+        /// Channel can be 0 to 15 for Midi channels 1 to 16
         channel: Channel,
+
+        /// The pitchbend value
         value: Value14,
     },
 
     // System common messages
 
     // System real time messages
+    /// Timing tick message
     TimingClock,
+
+    /// Start message
     Start,
+
+    /// Continue message
     Continue,
+
+    /// Stop message
     Stop,
+
+    /// Active sensing message
     ActiveSensing,
+
+    /// Reset message
     Reset,
 }
 
-/// Represents a midi note
+/// Represents a midi note number where 0 corresponds to C-2 and 127 corresponds to G8,
+/// C4 is 72
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Note(u8);
 

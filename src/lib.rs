@@ -2,12 +2,11 @@
 //!
 #![no_std]
 #[warn(missing_debug_implementations, missing_docs)]
-use embedded_hal::serial;
-use nb::block;
-
 mod midi;
 mod parser;
 
+use embedded_hal::serial;
+use nb::block;
 use core::fmt::Debug;
 pub use midi::{Channel, Control, MidiMessage, Note, Program};
 pub use parser::MidiParser;
