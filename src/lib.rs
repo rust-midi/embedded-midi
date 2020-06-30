@@ -5,10 +5,10 @@
 mod midi;
 mod parser;
 
-use embedded_hal::serial;
-use nb::block;
 use core::fmt::Debug;
+use embedded_hal::serial;
 pub use midi::{Channel, Control, MidiMessage, Note, Program};
+use nb::block;
 pub use parser::MidiParser;
 
 pub struct MidiIn<RX> {

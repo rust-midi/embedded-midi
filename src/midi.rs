@@ -4,7 +4,6 @@
 #[derive(Debug, PartialEq)]
 pub enum MidiMessage {
     // Channel voice messages
-
     /// Note Off message
     NoteOff {
         /// Channel can be 0 to 15 for Midi channels 1 to 16
@@ -81,6 +80,41 @@ pub enum MidiMessage {
     },
 
     // System common messages
+    /// System exclusive message starts
+    SystemExclusive {
+        /// The system exclusive manufacturer id, this is either a 1 byte or 3 byte number
+        manufacturer_id: u32,
+    },
+
+    /// System exclusive data is received
+    SystemExclusiveData {
+        /// The received data value
+        value: Value7,
+    },
+
+    /// Signals the end of the system exclusive block
+    EndOfExclusive,
+
+    /// Midi time code quarter frame
+    QuarterFrame {
+        /// TODO: implement parsing this message payload
+        values: Value7,
+    },
+
+    /// Set the song position pointer
+    SongPositionPointer {
+        /// A 14 bit value representing the number of beats since the start of the song
+        pointer: Value14,
+    },
+
+    /// Specifies which sequence or song is to be played
+    SongSelect {
+        /// The song or sequence
+        value: Value7,
+    },
+
+    /// Tune all oscillators
+    TuneRequest,
 
     // System real time messages
     /// Timing tick message
