@@ -513,8 +513,32 @@ mod tests {
     }
 
     #[test]
+    fn should_interrupt_parsing_for_tune_request() {
+        MidiParser::new().assert_result(
+            &[
+                0x92, 0x76, // start note_on message
+                0xf6, // interrupt with tune request
+                0x34, // finish note on, this should be ignored
+            ],
+            &[MidiMessage::TuneRequest],
+        );
+    }
+
+    #[test]
     fn should_parse_end_exclusive() {
         MidiParser::new().assert_result(&[0xf7], &[MidiMessage::EndOfExclusive]);
+    }
+
+    #[test]
+    fn should_interrupt_parsing_for_end_of_exclusive() {
+        MidiParser::new().assert_result(
+            &[
+                0x92, 0x76, // start note_on message
+                0xf7, // interrupt end of exclusive
+                0x34, // finish note on, this should be ignored
+            ],
+            &[MidiMessage::EndOfExclusive],
+        );
     }
 
     #[test]
