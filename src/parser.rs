@@ -92,12 +92,12 @@ impl MidiParser {
                     0xf6 => {
                         // Tune request
                         self.state = MidiParserState::Idle;
-                        None
+                        Some(MidiMessage::TuneRequest)
                     }
                     0xf7 => {
                         // End of exclusive
                         self.state = MidiParserState::Idle;
-                        None
+                        Some(MidiMessage::EndOfExclusive)
                     }
 
                     // System realtime messages
@@ -505,6 +505,16 @@ mod tests {
                 },
             ],
         );
+    }
+
+    #[test]
+    fn should_parse_tune_request() {
+        MidiParser::new().assert_result(&[0xf6], &[MidiMessage::TuneRequest]);
+    }
+
+    #[test]
+    fn should_parse_end_exclusive() {
+        MidiParser::new().assert_result(&[0xf7], &[MidiMessage::EndOfExclusive]);
     }
 
     #[test]
