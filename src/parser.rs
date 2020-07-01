@@ -74,16 +74,6 @@ impl MidiParser {
                         self.state = MidiParserState::Idle;
                         None
                     }
-                    0xf3 => {
-                        // Song select
-                        self.state = MidiParserState::Idle;
-                        None
-                    }
-                    0xf4 => {
-                        // Undefined
-                        self.state = MidiParserState::Idle;
-                        None
-                    }
                     0xf5 => {
                         // Undefined
                         self.state = MidiParserState::Idle;
@@ -110,7 +100,11 @@ impl MidiParser {
                     0xfe => Some(MidiMessage::ActiveSensing),
                     0xff => Some(MidiMessage::Reset),
 
-                    _ => None,
+                    _ => {
+                        // Undefined messages like 0xf4 and should end up here
+                        self.state = MidiParserState::Idle;
+                        None
+                    }
                 }
             } else {
                 // Channel voice message
@@ -534,10 +528,22 @@ mod tests {
         MidiParser::new().assert_result(
             &[
                 0x92, 0x76, // start note_on message
-                0xf7, // interrupt end of exclusive
+                0xf7, // interrupt with end of exclusive
                 0x34, // finish note on, this should be ignored
             ],
             &[MidiMessage::EndOfExclusive],
+        );
+    }
+
+    #[test]
+    fn should_interrupt_parsing_for_undefined_message() {
+        MidiParser::new().assert_result(
+            &[
+                0x92, 0x76, // start note_on message
+                0xf5, // interrupt with undefined message
+                0x34, // finish note on, this should be ignored
+            ],
+            &[],
         );
     }
 
