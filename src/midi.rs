@@ -247,6 +247,43 @@ impl Into<u16> for Value14 {
     }
 }
 
+/// The SMPTE type used. This indicates the number of frames per second
+pub enum SmpteType {
+    /// 24 frames per second
+    Frames24,
+
+    /// 25 frames per second
+    Frames25,
+
+    /// 29.97 frames per second
+    DropFrame30,
+
+    /// 30 frames per second
+    Frames30,
+}
+
+/// The value of the quarter frame message, this message contains a message type and a value. Each
+/// of these eight messages encodes a 4 bit part of the midi time code. As one of these is sent
+/// every quarter frames, the complete midi time code is sent every two frames.
+pub enum QuarterFrame {
+    /// Frame number low nibble
+    FrameLS { value: u8 },
+    /// Frame count high nibble
+    FrameMS { value: u8 },
+    /// Seconds low nibble
+    SecondsLS { value: u8 },
+    /// Seconds high nibble
+    SecondsMS { value: u8 },
+    /// Minutes low nibble
+    MinutesLS { value: u8 },
+    /// Minutes high nibble
+    MinutesMS { value: u8 },
+    /// Hours low nibble
+    HoursLS { value: u8 },
+    /// Combined hours high nibble and smpte type (frames per second)
+    HoursMS { value: u8, smpte_type: SmpteType },
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
