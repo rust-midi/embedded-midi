@@ -285,6 +285,31 @@ pub enum QuarterFrame {
     HoursMS { value: u8 },
 }
 
+impl From<u8> for QuarterFrame {
+    fn from(value: u8) -> Self {
+        let message_type = value & 0x70;
+        let value = value & 0x0f;
+
+        match message_type {
+            0x00 => QuarterFrame::FramesLS{value,},
+            0x10 => QuarterFrame::FramesMS{value},
+            0x20 =>QuarterFrame::SecondsLS{value},
+            0x30 =>QuarterFrame::SecondsMS{value},
+            0x40 =>QuarterFrame::MinutesLS{value},
+            0x50 =>QuarterFrame::MinutesMS{value},
+            0x60 =>QuarterFrame::HoursLS{value},
+            0x70 =>QuarterFrame::HoursMS{value},
+            _ => panic!("this should not be reachable")
+        }
+    }
+}
+
+// impl Into<u8> for QuarterFrame {
+//     fn into(self) -> (u8, u8) {
+//         (self.0, self.1)
+//     }
+// }
+
 #[cfg(test)]
 mod test {
     use super::*;
