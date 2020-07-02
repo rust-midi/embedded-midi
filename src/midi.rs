@@ -267,9 +267,9 @@ pub enum SmpteType {
 /// every quarter frames, the complete midi time code is sent every two frames.
 pub enum QuarterFrame {
     /// Frame number low nibble
-    FrameLS { value: u8 },
+    FramesLS { value: u8 },
     /// Frame count high nibble
-    FrameMS { value: u8 },
+    FramesMS { value: u8 },
     /// Seconds low nibble
     SecondsLS { value: u8 },
     /// Seconds high nibble
@@ -281,7 +281,8 @@ pub enum QuarterFrame {
     /// Hours low nibble
     HoursLS { value: u8 },
     /// Combined hours high nibble and smpte type (frames per second)
-    HoursMS { value: u8, smpte_type: SmpteType },
+    /// TODO, SMPTE type
+    HoursMS { value: u8 },
 }
 
 #[cfg(test)]
