@@ -24,6 +24,8 @@ enum MidiParserState {
 
     PitchBendRecvd { channel: Channel },
     PitchBendFirstByteRecvd { channel: Channel, byte1: u8 },
+
+    QuarterFrameRecvd,
 }
 
 /// Check if most significant bit is set which signifies a Midi status byte
@@ -66,7 +68,7 @@ impl MidiParser {
                     }
                     0xf1 => {
                         // Midi time code quarter frame
-                        self.state = MidiParserState::Idle;
+                        self.state = MidiParserState::QuarterFrameRecvd;
                         None
                     }
                     0xf2 => {
@@ -237,6 +239,9 @@ impl MidiParser {
                         value: (byte1, byte).into(),
                     })
                 }
+                MidiParserState::QuarterFrameRecvd => Some(MidiMessage::QuarterFrame {
+                    frame_data: byte.into(),
+                }),
                 _ => None,
             }
         }
@@ -496,6 +501,34 @@ mod tests {
                 MidiMessage::PitchBendChange {
                     channel: 3.into(),
                     value: (0x43, 0x01).into(),
+                },
+            ],
+        );
+    }
+
+    #[test]
+    fn should_parse_quarter_frame() {
+        MidiParser::new().assert_result(
+            &[0xf1, 0x7f],
+            &[MidiMessage::QuarterFrame {
+                frame_data: 0x7f.into(),
+            }],
+        );
+    }
+
+    #[test]
+    fn should_handle_quarter_frame_running_state() {
+        MidiParser::new().assert_result(
+            &[
+                0xf1, 0x7f, // Send quarter frame
+                0x56, // Only send data of next quarter frame
+            ],
+            &[
+                MidiMessage::QuarterFrame {
+                    frame_data: 0x7f.into(),
+                },
+                MidiMessage::QuarterFrame {
+                    frame_data: 0x56.into(),
                 },
             ],
         );
