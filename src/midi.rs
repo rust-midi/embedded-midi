@@ -98,7 +98,7 @@ pub enum MidiMessage {
     /// Midi time code quarter frame
     QuarterFrame {
         /// TODO: implement parsing this message payload
-        values: Value7,
+        frame_data: QuarterFrame,
     },
 
     /// Set the song position pointer
@@ -248,6 +248,7 @@ impl Into<u16> for Value14 {
 }
 
 /// The SMPTE type used. This indicates the number of frames per second
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum SmpteType {
     /// 24 frames per second
     Frames24,
@@ -265,6 +266,7 @@ pub enum SmpteType {
 /// The value of the quarter frame message, this message contains a message type and a value. Each
 /// of these eight messages encodes a 4 bit part of the midi time code. As one of these is sent
 /// every quarter frames, the complete midi time code is sent every two frames.
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum QuarterFrameType {
     /// Frame number low nibble
     FramesLS,
@@ -291,6 +293,7 @@ pub enum QuarterFrameType {
     HoursMS,
 }
 
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct QuarterFrame(u8);
 
 impl QuarterFrame {
