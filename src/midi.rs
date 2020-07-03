@@ -265,50 +265,59 @@ pub enum SmpteType {
 /// The value of the quarter frame message, this message contains a message type and a value. Each
 /// of these eight messages encodes a 4 bit part of the midi time code. As one of these is sent
 /// every quarter frames, the complete midi time code is sent every two frames.
-pub enum QuarterFrame {
+pub enum QuarterFrameType {
     /// Frame number low nibble
-    FramesLS { value: u8 },
+    FramesLS,
+
     /// Frame count high nibble
-    FramesMS { value: u8 },
+    FramesMS,
+
     /// Seconds low nibble
-    SecondsLS { value: u8 },
+    SecondsLS,
+
     /// Seconds high nibble
-    SecondsMS { value: u8 },
+    SecondsMS,
+
     /// Minutes low nibble
-    MinutesLS { value: u8 },
+    MinutesLS,
+
     /// Minutes high nibble
-    MinutesMS { value: u8 },
+    MinutesMS,
+
     /// Hours low nibble
-    HoursLS { value: u8 },
+    HoursLS,
+
     /// Combined hours high nibble and smpte type (frames per second)
-    /// TODO, SMPTE type
-    HoursMS { value: u8 },
+    HoursMS,
+}
+
+pub struct QuarterFrame(u8);
+
+impl QuarterFrame {
+    pub fn frame_type(&self) -> QuarterFrameType {
+        unimplemented!()
+    }
+
+    pub fn value(&self) -> u8 {
+        unimplemented!()
+    }
+
+    pub fn smpte_type(&self) -> SmpteType {
+        unimplemented!()
+    }
 }
 
 impl From<u8> for QuarterFrame {
     fn from(value: u8) -> Self {
-        let message_type = value & 0x70;
-        let value = value & 0x0f;
-
-        match message_type {
-            0x00 => QuarterFrame::FramesLS{value,},
-            0x10 => QuarterFrame::FramesMS{value},
-            0x20 =>QuarterFrame::SecondsLS{value},
-            0x30 =>QuarterFrame::SecondsMS{value},
-            0x40 =>QuarterFrame::MinutesLS{value},
-            0x50 =>QuarterFrame::MinutesMS{value},
-            0x60 =>QuarterFrame::HoursLS{value},
-            0x70 =>QuarterFrame::HoursMS{value},
-            _ => panic!("this should not be reachable")
-        }
+        Self(value)
     }
 }
 
-// impl Into<u8> for QuarterFrame {
-//     fn into(self) -> (u8, u8) {
-//         (self.0, self.1)
-//     }
-// }
+impl Into<u8> for QuarterFrame {
+    fn into(self) -> u8 {
+        self.0
+    }
+}
 
 #[cfg(test)]
 mod test {
