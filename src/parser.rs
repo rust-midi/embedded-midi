@@ -74,8 +74,8 @@ impl MidiParser {
                         self.state = MidiParserState::Idle;
                         None
                     }
-                    0xf5 => {
-                        // Undefined
+                    0xf3 => {
+                        // Song select
                         self.state = MidiParserState::Idle;
                         None
                     }
