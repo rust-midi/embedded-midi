@@ -558,6 +558,24 @@ mod tests {
     }
 
     #[test]
+    fn should_handle_song_position_pointer_running_state() {
+        MidiParser::new().assert_result(
+            &[
+                0xf2, 0x7f, 0x68, // Send song position pointer
+                0x23, 0x7b, // Only send data of next song position pointer
+            ],
+            &[
+                MidiMessage::SongPositionPointer {
+                    pointer: (0x7f, 0x68).into(),
+                },
+                MidiMessage::SongPositionPointer {
+                    pointer: (0x23, 0x7b).into(),
+                },
+            ],
+        );
+    }
+
+    #[test]
     fn should_parse_tune_request() {
         MidiParser::new().assert_result(&[0xf6], &[MidiMessage::TuneRequest]);
     }
