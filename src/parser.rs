@@ -6,29 +6,29 @@ pub struct MidiParser {
 
 enum MidiParserState {
     Idle,
-    NoteOnRecvd { channel: Channel },
-    NoteOnNoteRecvd { channel: Channel, note: Note },
+    NoteOnRecvd(Channel),
+    NoteOnNoteRecvd(Channel, Note),
 
-    NoteOffRecvd { channel: Channel },
-    NoteOffNoteRecvd { channel: Channel, note: Note },
+    NoteOffRecvd(Channel),
+    NoteOffNoteRecvd(Channel, Note),
 
-    KeyPressureRecvd { channel: Channel },
-    KeyPressureNoteRecvd { channel: Channel, note: Note },
+    KeyPressureRecvd(Channel),
+    KeyPressureNoteRecvd(Channel, Note),
 
-    ControlChangeRecvd { channel: Channel },
-    ControlChangeControlRecvd { channel: Channel, control: Control },
+    ControlChangeRecvd(Channel),
+    ControlChangeControlRecvd(Channel, Control),
 
-    ProgramChangeRecvd { channel: Channel },
+    ProgramChangeRecvd(Channel),
 
-    ChannelPressureRecvd { channel: Channel },
+    ChannelPressureRecvd(Channel),
 
-    PitchBendRecvd { channel: Channel },
-    PitchBendFirstByteRecvd { channel: Channel, byte1: u8 },
+    PitchBendRecvd(Channel),
+    PitchBendFirstByteRecvd(Channel, u8),
 
     QuarterFrameRecvd,
 
     SongPositionRecvd,
-    SongPositionLsbRecvd { lsb: u8 },
+    SongPositionLsbRecvd(u8),
 
     SongSelectRecvd,
 }
@@ -120,31 +120,31 @@ impl MidiParser {
 
                 match message {
                     0x80 => {
-                        self.state = MidiParserState::NoteOffRecvd { channel };
+                        self.state = MidiParserState::NoteOffRecvd(channel);
                         None
                     }
                     0x90 => {
-                        self.state = MidiParserState::NoteOnRecvd { channel };
+                        self.state = MidiParserState::NoteOnRecvd(channel);
                         None
                     }
                     0xA0 => {
-                        self.state = MidiParserState::KeyPressureRecvd { channel };
+                        self.state = MidiParserState::KeyPressureRecvd(channel);
                         None
                     }
                     0xB0 => {
-                        self.state = MidiParserState::ControlChangeRecvd { channel };
+                        self.state = MidiParserState::ControlChangeRecvd(channel);
                         None
                     }
                     0xC0 => {
-                        self.state = MidiParserState::ProgramChangeRecvd { channel };
+                        self.state = MidiParserState::ProgramChangeRecvd(channel);
                         None
                     }
                     0xD0 => {
-                        self.state = MidiParserState::ChannelPressureRecvd { channel };
+                        self.state = MidiParserState::ChannelPressureRecvd(channel);
                         None
                     }
                     0xE0 => {
-                        self.state = MidiParserState::PitchBendRecvd { channel };
+                        self.state = MidiParserState::PitchBendRecvd(channel);
                         None
                     }
                     _ => None,
@@ -152,15 +152,12 @@ impl MidiParser {
             }
         } else {
             match self.state {
-                MidiParserState::NoteOffRecvd { channel } => {
-                    self.state = MidiParserState::NoteOffNoteRecvd {
-                        channel,
-                        note: byte.into(),
-                    };
+                MidiParserState::NoteOffRecvd(channel) => {
+                    self.state = MidiParserState::NoteOffNoteRecvd(channel, byte.into());
                     None
                 }
-                MidiParserState::NoteOffNoteRecvd { channel, note } => {
-                    self.state = MidiParserState::NoteOffRecvd { channel };
+                MidiParserState::NoteOffNoteRecvd(channel, note) => {
+                    self.state = MidiParserState::NoteOffRecvd(channel);
                     Some(MidiMessage::NoteOff {
                         channel,
                         note,
@@ -168,15 +165,12 @@ impl MidiParser {
                     })
                 }
 
-                MidiParserState::NoteOnRecvd { channel } => {
-                    self.state = MidiParserState::NoteOnNoteRecvd {
-                        channel,
-                        note: byte.into(),
-                    };
+                MidiParserState::NoteOnRecvd(channel) => {
+                    self.state = MidiParserState::NoteOnNoteRecvd(channel, byte.into());
                     None
                 }
-                MidiParserState::NoteOnNoteRecvd { channel, note } => {
-                    self.state = MidiParserState::NoteOnRecvd { channel };
+                MidiParserState::NoteOnNoteRecvd(channel, note) => {
+                    self.state = MidiParserState::NoteOnRecvd(channel);
                     Some(MidiMessage::NoteOn {
                         channel,
                         note,
@@ -184,15 +178,12 @@ impl MidiParser {
                     })
                 }
 
-                MidiParserState::KeyPressureRecvd { channel } => {
-                    self.state = MidiParserState::KeyPressureNoteRecvd {
-                        channel,
-                        note: byte.into(),
-                    };
+                MidiParserState::KeyPressureRecvd(channel) => {
+                    self.state = MidiParserState::KeyPressureNoteRecvd(channel, byte.into());
                     None
                 }
-                MidiParserState::KeyPressureNoteRecvd { channel, note } => {
-                    self.state = MidiParserState::KeyPressureRecvd { channel };
+                MidiParserState::KeyPressureNoteRecvd(channel, note) => {
+                    self.state = MidiParserState::KeyPressureRecvd(channel);
                     Some(MidiMessage::KeyPressure {
                         channel,
                         note,
@@ -200,15 +191,12 @@ impl MidiParser {
                     })
                 }
 
-                MidiParserState::ControlChangeRecvd { channel } => {
-                    self.state = MidiParserState::ControlChangeControlRecvd {
-                        channel,
-                        control: byte.into(),
-                    };
+                MidiParserState::ControlChangeRecvd(channel) => {
+                    self.state = MidiParserState::ControlChangeControlRecvd(channel, byte.into());
                     None
                 }
-                MidiParserState::ControlChangeControlRecvd { channel, control } => {
-                    self.state = MidiParserState::ControlChangeRecvd { channel };
+                MidiParserState::ControlChangeControlRecvd(channel, control) => {
+                    self.state = MidiParserState::ControlChangeRecvd(channel);
                     Some(MidiMessage::ControlChange {
                         channel,
                         control,
@@ -216,29 +204,24 @@ impl MidiParser {
                     })
                 }
 
-                MidiParserState::ProgramChangeRecvd { channel } => {
-                    Some(MidiMessage::ProgramChange {
-                        channel,
-                        program: byte.into(),
-                    })
-                }
+                MidiParserState::ProgramChangeRecvd(channel) => Some(MidiMessage::ProgramChange {
+                    channel,
+                    program: byte.into(),
+                }),
 
-                MidiParserState::ChannelPressureRecvd { channel } => {
+                MidiParserState::ChannelPressureRecvd(channel) => {
                     Some(MidiMessage::ChannelPressure {
                         channel,
                         value: byte.into(),
                     })
                 }
 
-                MidiParserState::PitchBendRecvd { channel } => {
-                    self.state = MidiParserState::PitchBendFirstByteRecvd {
-                        channel,
-                        byte1: byte,
-                    };
+                MidiParserState::PitchBendRecvd(channel) => {
+                    self.state = MidiParserState::PitchBendFirstByteRecvd(channel, byte);
                     None
                 }
-                MidiParserState::PitchBendFirstByteRecvd { channel, byte1 } => {
-                    self.state = MidiParserState::PitchBendRecvd { channel };
+                MidiParserState::PitchBendFirstByteRecvd(channel, byte1) => {
+                    self.state = MidiParserState::PitchBendRecvd(channel);
                     Some(MidiMessage::PitchBendChange {
                         channel,
                         value: (byte1, byte).into(),
@@ -248,10 +231,10 @@ impl MidiParser {
                     frame_data: byte.into(),
                 }),
                 MidiParserState::SongPositionRecvd => {
-                    self.state = MidiParserState::SongPositionLsbRecvd { lsb: byte };
+                    self.state = MidiParserState::SongPositionLsbRecvd(byte);
                     None
                 }
-                MidiParserState::SongPositionLsbRecvd { lsb } => {
+                MidiParserState::SongPositionLsbRecvd(lsb) => {
                     self.state = MidiParserState::SongPositionRecvd;
                     Some(MidiMessage::SongPositionPointer {
                         pointer: (lsb, byte).into(),
