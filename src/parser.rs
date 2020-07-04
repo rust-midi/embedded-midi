@@ -29,6 +29,8 @@ enum MidiParserState {
 
     SongPositionRecvd,
     SongPositionLsbRecvd { lsb: u8 },
+
+    SongSelectRecvd,
 }
 
 /// Check if most significant bit is set which signifies a Midi status byte
@@ -81,7 +83,7 @@ impl MidiParser {
                     }
                     0xf3 => {
                         // Song select
-                        self.state = MidiParserState::Idle;
+                        self.state = MidiParserState::SongSelectRecvd;
                         None
                     }
                     0xf6 => {
@@ -242,6 +244,9 @@ impl MidiParser {
                         value: (byte1, byte).into(),
                     })
                 }
+                MidiParserState::QuarterFrameRecvd => Some(MidiMessage::QuarterFrame {
+                    frame_data: byte.into(),
+                }),
                 MidiParserState::SongPositionRecvd => {
                     self.state = MidiParserState::SongPositionLsbRecvd { lsb: byte };
                     None
@@ -252,9 +257,9 @@ impl MidiParser {
                         pointer: (lsb, byte).into(),
                     })
                 }
-                MidiParserState::QuarterFrameRecvd => Some(MidiMessage::QuarterFrame {
-                    frame_data: byte.into(),
-                }),
+                MidiParserState::SongSelectRecvd => {
+                    Some(MidiMessage::SongSelect { value: byte.into() })
+                }
                 _ => None,
             }
         }
@@ -571,6 +576,28 @@ mod tests {
                 MidiMessage::SongPositionPointer {
                     pointer: (0x23, 0x7b).into(),
                 },
+            ],
+        );
+    }
+
+    #[test]
+    fn should_parse_song_select() {
+        MidiParser::new().assert_result(
+            &[0xf3, 0x3f],
+            &[MidiMessage::SongSelect { value: 0x3f.into() }],
+        );
+    }
+
+    #[test]
+    fn should_handle_song_select_running_state() {
+        MidiParser::new().assert_result(
+            &[
+                0xf3, 0x3f, // Send song select
+                0x00, // Only send data for next song select
+            ],
+            &[
+                MidiMessage::SongSelect { value: 0x3f.into() },
+                MidiMessage::SongSelect { value: 0x00.into() },
             ],
         );
     }
