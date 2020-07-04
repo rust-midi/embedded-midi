@@ -26,6 +26,9 @@ enum MidiParserState {
     PitchBendFirstByteRecvd { channel: Channel, byte1: u8 },
 
     QuarterFrameRecvd,
+
+    SongPositionRecvd,
+    SongPositionLsbRecvd { lsb: u8 },
 }
 
 /// Check if most significant bit is set which signifies a Midi status byte
@@ -73,7 +76,7 @@ impl MidiParser {
                     }
                     0xf2 => {
                         // Song position pointer
-                        self.state = MidiParserState::Idle;
+                        self.state = MidiParserState::SongPositionRecvd;
                         None
                     }
                     0xf3 => {
@@ -237,6 +240,16 @@ impl MidiParser {
                     Some(MidiMessage::PitchBendChange {
                         channel,
                         value: (byte1, byte).into(),
+                    })
+                }
+                MidiParserState::SongPositionRecvd => {
+                    self.state = MidiParserState::SongPositionLsbRecvd { lsb: byte };
+                    None
+                }
+                MidiParserState::SongPositionLsbRecvd { lsb } => {
+                    self.state = MidiParserState::SongPositionRecvd;
+                    Some(MidiMessage::SongPositionPointer {
+                        pointer: (lsb, byte).into(),
                     })
                 }
                 MidiParserState::QuarterFrameRecvd => Some(MidiMessage::QuarterFrame {
@@ -531,6 +544,16 @@ mod tests {
                     frame_data: 0x56.into(),
                 },
             ],
+        );
+    }
+
+    #[test]
+    fn should_parse_song_position_pointer() {
+        MidiParser::new().assert_result(
+            &[0xf2, 0x7f, 0x68],
+            &[MidiMessage::SongPositionPointer {
+                pointer: (0x7f, 0x68).into(),
+            }],
         );
     }
 
