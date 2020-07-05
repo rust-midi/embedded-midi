@@ -159,11 +159,7 @@ impl MidiParser {
                 }
                 MidiParserState::NoteOffNoteRecvd(channel, note) => {
                     self.state = MidiParserState::NoteOffRecvd(channel);
-                    Some(MidiMessage::NoteOff {
-                        channel,
-                        note,
-                        velocity: byte.into(),
-                    })
+                    Some(MidiMessage::NoteOff(channel, note, byte.into()))
                 }
 
                 MidiParserState::NoteOnRecvd(channel) => {
@@ -172,11 +168,7 @@ impl MidiParser {
                 }
                 MidiParserState::NoteOnNoteRecvd(channel, note) => {
                     self.state = MidiParserState::NoteOnRecvd(channel);
-                    Some(MidiMessage::NoteOn {
-                        channel,
-                        note,
-                        velocity: byte.into(),
-                    })
+                    Some(MidiMessage::NoteOn(channel, note, byte.into()))
                 }
 
                 MidiParserState::KeyPressureRecvd(channel) => {
@@ -274,11 +266,7 @@ mod tests {
     fn should_parse_note_off() {
         MidiParser::new().assert_result(
             &[0x82, 0x76, 0x34],
-            &[MidiMessage::NoteOff {
-                channel: 2.into(),
-                note: 0x76.into(),
-                velocity: 0x34.into(),
-            }],
+            &[MidiMessage::NoteOff(2.into(), 0x76.into(), 0x34.into())],
         );
     }
 
@@ -290,16 +278,8 @@ mod tests {
                 0x33, 0x65, // Second note_off without status byte
             ],
             &[
-                MidiMessage::NoteOff {
-                    channel: 2.into(),
-                    note: 0x76.into(),
-                    velocity: 0x34.into(),
-                },
-                MidiMessage::NoteOff {
-                    channel: 2.into(),
-                    note: 0x33.into(),
-                    velocity: 0x65.into(),
-                },
+                MidiMessage::NoteOff(2.into(), 0x76.into(), 0x34.into()),
+                MidiMessage::NoteOff(2.into(), 0x33.into(), 0x65.into()),
             ],
         );
     }
@@ -308,11 +288,7 @@ mod tests {
     fn should_parse_note_on() {
         MidiParser::new().assert_result(
             &[0x91, 0x04, 0x34],
-            &[MidiMessage::NoteOn {
-                channel: 1.into(),
-                note: 4.into(),
-                velocity: 0x34.into(),
-            }],
+            &[MidiMessage::NoteOn(1.into(), 4.into(), 0x34.into())],
         );
     }
 
@@ -324,16 +300,8 @@ mod tests {
                 0x33, 0x65, // Second note on without status byte
             ],
             &[
-                MidiMessage::NoteOn {
-                    channel: 2.into(),
-                    note: 0x76.into(),
-                    velocity: 0x34.into(),
-                },
-                MidiMessage::NoteOn {
-                    channel: 2.into(),
-                    note: 0x33.into(),
-                    velocity: 0x65.into(),
-                },
+                MidiMessage::NoteOn(2.into(), 0x76.into(), 0x34.into()),
+                MidiMessage::NoteOn(2.into(), 0x33.into(), 0x65.into()),
             ],
         );
     }
@@ -741,11 +709,7 @@ mod tests {
                 0x92, 0x1b, // Start note off message
                 0x82, 0x76, 0x34, // continue with a complete note on message
             ],
-            &[MidiMessage::NoteOff {
-                channel: 2.into(),
-                note: 0x76.into(),
-                velocity: 0x34.into(),
-            }],
+            &[MidiMessage::NoteOff(2.into(), 0x76.into(), 0x34.into())],
         );
     }
 

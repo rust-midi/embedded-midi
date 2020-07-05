@@ -53,21 +53,13 @@ where
 
     pub fn write(&mut self, event: MidiMessage) -> Result<(), E> {
         match event {
-            MidiMessage::NoteOn {
-                channel,
-                note,
-                velocity,
-            } => {
+            MidiMessage::NoteOn(channel, note, velocity) => {
                 let channelnum: u8 = channel.into();
                 block!(self.tx.write(0x90u8 + channelnum))?;
                 block!(self.tx.write(note.into()))?;
                 block!(self.tx.write(velocity.into()))?;
             }
-            MidiMessage::NoteOff {
-                channel,
-                note,
-                velocity,
-            } => {
+            MidiMessage::NoteOff(channel, note, velocity) => {
                 let channelnum: u8 = channel.into();
                 block!(self.tx.write(0x80u8 + channelnum))?;
                 block!(self.tx.write(note.into()))?;

@@ -5,28 +5,10 @@
 pub enum MidiMessage {
     // Channel voice messages
     /// Note Off message
-    NoteOff {
-        /// Channel can be 0 to 15 for Midi channels 1 to 16
-        channel: Channel,
-
-        /// The note number
-        note: Note,
-
-        /// Note off velocity
-        velocity: Value7,
-    },
+    NoteOff(Channel, Note, Value7),
 
     /// Note on message
-    NoteOn {
-        /// Channel can be 0 to 15 for Midi channels 1 to 16
-        channel: Channel,
-
-        /// The note number
-        note: Note,
-
-        /// Note on velocity
-        velocity: Value7,
-    },
+    NoteOn(Channel, Note, Value7),
 
     /// KeyPressure message for polyphonic aftertouch
     KeyPressure {
