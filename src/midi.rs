@@ -35,13 +35,7 @@ pub enum MidiMessage {
     },
 
     /// Channel pressure message for channel aftertouch
-    ChannelPressure {
-        /// Channel can be 0 to 15 for Midi channels 1 to 16
-        channel: Channel,
-
-        /// The pressure value
-        value: Value7,
-    },
+    ChannelPressure(Channel, Value7),
 
     /// Pitch bend message
     PitchBendChange(Channel, Value14),

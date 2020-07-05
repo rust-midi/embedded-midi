@@ -199,10 +199,7 @@ impl MidiParser {
                 }),
 
                 MidiParserState::ChannelPressureRecvd(channel) => {
-                    Some(MidiMessage::ChannelPressure {
-                        channel,
-                        value: byte.into(),
-                    })
+                    Some(MidiMessage::ChannelPressure(channel, byte.into()))
                 }
 
                 MidiParserState::PitchBendRecvd(channel) => {
@@ -397,10 +394,7 @@ mod tests {
     fn should_parse_channel_pressure() {
         MidiParser::new().assert_result(
             &[0xDD, 0x37],
-            &[MidiMessage::ChannelPressure {
-                channel: 13.into(),
-                value: 0x37.into(),
-            }],
+            &[MidiMessage::ChannelPressure(13.into(), 0x37.into())],
         );
     }
 
@@ -412,14 +406,8 @@ mod tests {
                 0x43, // Second channel pressure without status byte
             ],
             &[
-                MidiMessage::ChannelPressure {
-                    channel: 6.into(),
-                    value: 0x77.into(),
-                },
-                MidiMessage::ChannelPressure {
-                    channel: 6.into(),
-                    value: 0x43.into(),
-                },
+                MidiMessage::ChannelPressure(6.into(), 0x77.into()),
+                MidiMessage::ChannelPressure(6.into(), 0x43.into()),
             ],
         );
     }
@@ -567,10 +555,7 @@ mod tests {
             ],
             &[
                 MidiMessage::TimingClock,
-                MidiMessage::ChannelPressure {
-                    channel: 6.into(),
-                    value: 0x77.into(),
-                },
+                MidiMessage::ChannelPressure(6.into(), 0x77.into()),
             ],
         );
     }
@@ -590,10 +575,7 @@ mod tests {
             ],
             &[
                 MidiMessage::Start,
-                MidiMessage::ChannelPressure {
-                    channel: 6.into(),
-                    value: 0x77.into(),
-                },
+                MidiMessage::ChannelPressure(6.into(), 0x77.into()),
             ],
         );
     }
@@ -613,10 +595,7 @@ mod tests {
             ],
             &[
                 MidiMessage::Continue,
-                MidiMessage::ChannelPressure {
-                    channel: 6.into(),
-                    value: 0x77.into(),
-                },
+                MidiMessage::ChannelPressure(6.into(), 0x77.into()),
             ],
         );
     }
@@ -636,10 +615,7 @@ mod tests {
             ],
             &[
                 MidiMessage::Stop,
-                MidiMessage::ChannelPressure {
-                    channel: 6.into(),
-                    value: 0x77.into(),
-                },
+                MidiMessage::ChannelPressure(6.into(), 0x77.into()),
             ],
         );
     }
@@ -659,10 +635,7 @@ mod tests {
             ],
             &[
                 MidiMessage::ActiveSensing,
-                MidiMessage::ChannelPressure {
-                    channel: 6.into(),
-                    value: 0x77.into(),
-                },
+                MidiMessage::ChannelPressure(6.into(), 0x77.into()),
             ],
         );
     }
@@ -682,10 +655,7 @@ mod tests {
             ],
             &[
                 MidiMessage::Reset,
-                MidiMessage::ChannelPressure {
-                    channel: 6.into(),
-                    value: 0x77.into(),
-                },
+                MidiMessage::ChannelPressure(6.into(), 0x77.into()),
             ],
         );
     }
