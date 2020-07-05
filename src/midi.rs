@@ -71,13 +71,7 @@ pub enum MidiMessage {
     },
 
     /// Pitch bend message
-    PitchBendChange {
-        /// Channel can be 0 to 15 for Midi channels 1 to 16
-        channel: Channel,
-
-        /// The pitchbend value
-        value: Value14,
-    },
+    PitchBendChange(Channel, Value14),
 
     // System common messages
     /// System exclusive message starts

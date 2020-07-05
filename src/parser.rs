@@ -223,10 +223,7 @@ impl MidiParser {
                 }
                 MidiParserState::PitchBendFirstByteRecvd(channel, byte1) => {
                     self.state = MidiParserState::PitchBendRecvd(channel);
-                    Some(MidiMessage::PitchBendChange {
-                        channel,
-                        value: (byte1, byte).into(),
-                    })
+                    Some(MidiMessage::PitchBendChange(channel, (byte1, byte).into()))
                 }
                 MidiParserState::QuarterFrameRecvd => Some(MidiMessage::QuarterFrame(byte.into())),
                 MidiParserState::SongPositionRecvd => {
@@ -475,10 +472,7 @@ mod tests {
     fn should_parse_pitchbend() {
         MidiParser::new().assert_result(
             &[0xE8, 0x14, 0x56],
-            &[MidiMessage::PitchBendChange {
-                channel: 8.into(),
-                value: (0x14, 0x56).into(),
-            }],
+            &[MidiMessage::PitchBendChange(8.into(), (0x14, 0x56).into())],
         );
     }
 
@@ -490,14 +484,8 @@ mod tests {
                 0x43, 0x01, // Second pitchbend without status byte
             ],
             &[
-                MidiMessage::PitchBendChange {
-                    channel: 3.into(),
-                    value: (0x3C, 0x18).into(),
-                },
-                MidiMessage::PitchBendChange {
-                    channel: 3.into(),
-                    value: (0x43, 0x01).into(),
-                },
+                MidiMessage::PitchBendChange(3.into(), (0x3c, 0x18).into()),
+                MidiMessage::PitchBendChange(3.into(), (0x43, 0x01).into()),
             ],
         );
     }
