@@ -93,22 +93,13 @@ pub enum MidiMessage {
     // EndOfExclusive,
 
     /// Midi time code quarter frame
-    QuarterFrame {
-        /// TODO: implement parsing this message payload
-        frame_data: QuarterFrame,
-    },
+    QuarterFrame(QuarterFrame),
 
     /// Set the song position pointer
-    SongPositionPointer {
-        /// A 14 bit value representing the number of beats since the start of the song
-        pointer: Value14,
-    },
+    SongPositionPointer(Value14),
 
     /// Specifies which sequence or song is to be played
-    SongSelect {
-        /// The song or sequence
-        value: Value7,
-    },
+    SongSelect(Value7),
 
     /// Tune all oscillators
     TuneRequest,

@@ -228,22 +228,16 @@ impl MidiParser {
                         value: (byte1, byte).into(),
                     })
                 }
-                MidiParserState::QuarterFrameRecvd => Some(MidiMessage::QuarterFrame {
-                    frame_data: byte.into(),
-                }),
+                MidiParserState::QuarterFrameRecvd => Some(MidiMessage::QuarterFrame(byte.into())),
                 MidiParserState::SongPositionRecvd => {
                     self.state = MidiParserState::SongPositionLsbRecvd(byte);
                     None
                 }
                 MidiParserState::SongPositionLsbRecvd(lsb) => {
                     self.state = MidiParserState::SongPositionRecvd;
-                    Some(MidiMessage::SongPositionPointer {
-                        pointer: (lsb, byte).into(),
-                    })
+                    Some(MidiMessage::SongPositionPointer((lsb, byte).into()))
                 }
-                MidiParserState::SongSelectRecvd => {
-                    Some(MidiMessage::SongSelect { value: byte.into() })
-                }
+                MidiParserState::SongSelectRecvd => Some(MidiMessage::SongSelect(byte.into())),
                 _ => None,
             }
         }
@@ -510,12 +504,7 @@ mod tests {
 
     #[test]
     fn should_parse_quarter_frame() {
-        MidiParser::new().assert_result(
-            &[0xf1, 0x7f],
-            &[MidiMessage::QuarterFrame {
-                frame_data: 0x7f.into(),
-            }],
-        );
+        MidiParser::new().assert_result(&[0xf1, 0x7f], &[MidiMessage::QuarterFrame(0x7f.into())]);
     }
 
     #[test]
@@ -526,12 +515,8 @@ mod tests {
                 0x56, // Only send data of next quarter frame
             ],
             &[
-                MidiMessage::QuarterFrame {
-                    frame_data: 0x7f.into(),
-                },
-                MidiMessage::QuarterFrame {
-                    frame_data: 0x56.into(),
-                },
+                MidiMessage::QuarterFrame(0x7f.into()),
+                MidiMessage::QuarterFrame(0x56.into()),
             ],
         );
     }
@@ -540,9 +525,7 @@ mod tests {
     fn should_parse_song_position_pointer() {
         MidiParser::new().assert_result(
             &[0xf2, 0x7f, 0x68],
-            &[MidiMessage::SongPositionPointer {
-                pointer: (0x7f, 0x68).into(),
-            }],
+            &[MidiMessage::SongPositionPointer((0x7f, 0x68).into())],
         );
     }
 
@@ -554,22 +537,15 @@ mod tests {
                 0x23, 0x7b, // Only send data of next song position pointer
             ],
             &[
-                MidiMessage::SongPositionPointer {
-                    pointer: (0x7f, 0x68).into(),
-                },
-                MidiMessage::SongPositionPointer {
-                    pointer: (0x23, 0x7b).into(),
-                },
+                MidiMessage::SongPositionPointer((0x7f, 0x68).into()),
+                MidiMessage::SongPositionPointer((0x23, 0x7b).into()),
             ],
         );
     }
 
     #[test]
     fn should_parse_song_select() {
-        MidiParser::new().assert_result(
-            &[0xf3, 0x3f],
-            &[MidiMessage::SongSelect { value: 0x3f.into() }],
-        );
+        MidiParser::new().assert_result(&[0xf3, 0x3f], &[MidiMessage::SongSelect(0x3f.into())]);
     }
 
     #[test]
@@ -580,8 +556,8 @@ mod tests {
                 0x00, // Only send data for next song select
             ],
             &[
-                MidiMessage::SongSelect { value: 0x3f.into() },
-                MidiMessage::SongSelect { value: 0x00.into() },
+                MidiMessage::SongSelect(0x3f.into()),
+                MidiMessage::SongSelect(0x00.into()),
             ],
         );
     }
