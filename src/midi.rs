@@ -81,19 +81,16 @@ pub enum MidiMessage {
 
     // System common messages
     /// System exclusive message starts
-    SystemExclusive {
-        /// The system exclusive manufacturer id, this is either a 1 byte or 3 byte number
-        manufacturer_id: u32,
-    },
+    // SystemExclusive {
+    //     /// The system exclusive manufacturer id, this is either a 1 byte or 3 byte number
+    //     manufacturer_id: u32,
+    // },
 
     /// System exclusive data is received
-    SystemExclusiveData {
-        /// The received data value
-        value: Value7,
-    },
+    // SystemExclusiveData (Value7),
 
     /// Signals the end of the system exclusive block
-    EndOfExclusive,
+    // EndOfExclusive,
 
     /// Midi time code quarter frame
     QuarterFrame {
