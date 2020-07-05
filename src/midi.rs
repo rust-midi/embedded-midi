@@ -11,16 +11,7 @@ pub enum MidiMessage {
     NoteOn(Channel, Note, Value7),
 
     /// KeyPressure message for polyphonic aftertouch
-    KeyPressure {
-        /// Channel can be 0 to 15 for Midi channels 1 to 16
-        channel: Channel,
-
-        /// The note number
-        note: Note,
-
-        /// The keypressure value
-        value: Value7,
-    },
+    KeyPressure(Channel, Note, Value7),
 
     /// Control change message
     ControlChange {

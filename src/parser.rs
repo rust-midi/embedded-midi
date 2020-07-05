@@ -177,11 +177,7 @@ impl MidiParser {
                 }
                 MidiParserState::KeyPressureNoteRecvd(channel, note) => {
                     self.state = MidiParserState::KeyPressureRecvd(channel);
-                    Some(MidiMessage::KeyPressure {
-                        channel,
-                        note,
-                        value: byte.into(),
-                    })
+                    Some(MidiMessage::KeyPressure(channel, note, byte.into()))
                 }
 
                 MidiParserState::ControlChangeRecvd(channel) => {
@@ -310,11 +306,11 @@ mod tests {
     fn should_parse_keypressure() {
         MidiParser::new().assert_result(
             &[0xAA, 0x13, 0x34],
-            &[MidiMessage::KeyPressure {
-                channel: 10.into(),
-                note: 0x13.into(),
-                value: 0x34.into(),
-            }],
+            &[MidiMessage::KeyPressure(
+                10.into(),
+                0x13.into(),
+                0x34.into(),
+            )],
         );
     }
 
@@ -326,16 +322,8 @@ mod tests {
                 0x14, 0x56, // Second key_pressure without status byte
             ],
             &[
-                MidiMessage::KeyPressure {
-                    channel: 8.into(),
-                    note: 0x77.into(),
-                    value: 0x03.into(),
-                },
-                MidiMessage::KeyPressure {
-                    channel: 8.into(),
-                    note: 0x14.into(),
-                    value: 0x56.into(),
-                },
+                MidiMessage::KeyPressure(8.into(), 0x77.into(), 0x03.into()),
+                MidiMessage::KeyPressure(8.into(), 0x14.into(), 0x56.into()),
             ],
         );
     }
