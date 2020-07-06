@@ -17,13 +17,7 @@ pub enum MidiMessage {
     ControlChange(Channel, Control, Value7),
 
     /// Program change message
-    ProgramChange {
-        /// Channel can be 0 to 15 for Midi channels 1 to 16
-        channel: Channel,
-
-        /// The program number
-        program: Program,
-    },
+    ProgramChange(Channel, Program),
 
     /// Channel pressure message for channel aftertouch
     ChannelPressure(Channel, Value7),

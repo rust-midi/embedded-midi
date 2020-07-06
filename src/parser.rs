@@ -189,10 +189,9 @@ impl MidiParser {
                     Some(MidiMessage::ControlChange(channel, control, byte.into()))
                 }
 
-                MidiParserState::ProgramChangeRecvd(channel) => Some(MidiMessage::ProgramChange {
-                    channel,
-                    program: byte.into(),
-                }),
+                MidiParserState::ProgramChangeRecvd(channel) => {
+                    Some(MidiMessage::ProgramChange(channel, byte.into()))
+                }
 
                 MidiParserState::ChannelPressureRecvd(channel) => {
                     Some(MidiMessage::ChannelPressure(channel, byte.into()))
@@ -351,10 +350,7 @@ mod tests {
     fn should_parse_program_change() {
         MidiParser::new().assert_result(
             &[0xC9, 0x15],
-            &[MidiMessage::ProgramChange {
-                channel: 9.into(),
-                program: 0x15.into(),
-            }],
+            &[MidiMessage::ProgramChange(9.into(), 0x15.into())],
         );
     }
 
@@ -366,14 +362,8 @@ mod tests {
                 0x01, // Second program change without status byte
             ],
             &[
-                MidiMessage::ProgramChange {
-                    channel: 3.into(),
-                    program: 0x67.into(),
-                },
-                MidiMessage::ProgramChange {
-                    channel: 3.into(),
-                    program: 0x01.into(),
-                },
+                MidiMessage::ProgramChange(3.into(), 0x67.into()),
+                MidiMessage::ProgramChange(3.into(), 0x01.into()),
             ],
         );
     }
