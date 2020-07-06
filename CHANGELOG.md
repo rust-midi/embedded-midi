@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- ...
+...
+
+### Changed
+...
+
+## [0.0.2] - 2020-07-06
+
+### Added
+- Receive and parse all messages except system exclusive
+- Parse running state messages
 
 ### Changed
 - Move midi parsing to separate module
@@ -21,5 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Send note-on and note-off messages
 - Basic examples
 
-[unreleased]: https://github.com/mendelt/embedded-midi/compare/0.0.1...HEAD
+[unreleased]: https://github.com/mendelt/embedded-midi/compare/0.0.2...HEAD
+[0.0.2]: https://github.com/mendelt/embedded-midi/releases/tag/0.0.2
 [0.0.1]: https://github.com/mendelt/embedded-midi/releases/tag/0.0.1
