@@ -186,11 +186,7 @@ impl MidiParser {
                 }
                 MidiParserState::ControlChangeControlRecvd(channel, control) => {
                     self.state = MidiParserState::ControlChangeRecvd(channel);
-                    Some(MidiMessage::ControlChange {
-                        channel,
-                        control,
-                        value: byte.into(),
-                    })
+                    Some(MidiMessage::ControlChange(channel, control, byte.into()))
                 }
 
                 MidiParserState::ProgramChangeRecvd(channel) => Some(MidiMessage::ProgramChange {
@@ -329,11 +325,11 @@ mod tests {
     fn should_parse_control_change() {
         MidiParser::new().assert_result(
             &[0xB2, 0x76, 0x34],
-            &[MidiMessage::ControlChange {
-                channel: 2.into(),
-                control: 0x76.into(),
-                value: 0x34.into(),
-            }],
+            &[MidiMessage::ControlChange(
+                2.into(),
+                0x76.into(),
+                0x34.into(),
+            )],
         );
     }
 
@@ -345,16 +341,8 @@ mod tests {
                 0x43, 0x01, // Second control change without status byte
             ],
             &[
-                MidiMessage::ControlChange {
-                    channel: 3.into(),
-                    control: 0x3C.into(),
-                    value: 0x18.into(),
-                },
-                MidiMessage::ControlChange {
-                    channel: 3.into(),
-                    control: 0x43.into(),
-                    value: 0x01.into(),
-                },
+                MidiMessage::ControlChange(3.into(), 0x3c.into(), 0x18.into()),
+                MidiMessage::ControlChange(3.into(), 0x43.into(), 0x01.into()),
             ],
         );
     }

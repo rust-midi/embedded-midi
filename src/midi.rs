@@ -14,16 +14,7 @@ pub enum MidiMessage {
     KeyPressure(Channel, Note, Value7),
 
     /// Control change message
-    ControlChange {
-        /// Channel can be 0 to 15 for Midi channels 1 to 16
-        channel: Channel,
-
-        /// The control number
-        control: Control,
-
-        /// The control value
-        value: Value7,
-    },
+    ControlChange(Channel, Control, Value7),
 
     /// Program change message
     ProgramChange {
