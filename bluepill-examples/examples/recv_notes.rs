@@ -5,14 +5,12 @@ use cortex_m_rt::entry;
 use cortex_m_semihosting::hprintln;
 use embedded_midi::MidiIn;
 use nb::block;
+use panic_semihosting as _;
 use stm32f1xx_hal::{
     pac,
     prelude::*,
     serial::{Config, Serial},
 };
-
-#[allow(unused_imports)]
-use panic_semihosting;
 
 #[entry]
 fn main() -> ! {

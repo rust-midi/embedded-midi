@@ -11,8 +11,7 @@ use stm32f1xx_hal::{
     serial::{Config, Serial},
 };
 
-#[allow(unused_imports)]
-use panic_semihosting;
+use panic_semihosting as _;
 
 #[entry]
 fn main() -> ! {
