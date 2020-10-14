@@ -1,4 +1,5 @@
-# embedded-midi &emsp; [![Build Status](https://travis-ci.org/mendelt/embedded-midi.svg?branch=master)](https://travis-ci.org/mendelt/embedded-midi)
+# embedded-midi &emsp;
+[![Build Status](https://github.com/mendelt/embedded-midi/workflows/Build/badge.svg)](https://github.com/mendelt/embedded-midi/actions?query=workflow%3ABuild+event%3Apush+branch%3Amaster)
 
 *Midi driver on top of embedded hal serial communications*
 
