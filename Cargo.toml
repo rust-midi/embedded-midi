@@ -11,9 +11,6 @@ categories = ["no-std", "embedded"]
 keywords = ["embedded", "midi", "uart"]
 readme = "README.md"
 
-[badges]
-travis-ci = { repository = "mendelt/embedded-midi" }
-
 [dependencies]
 nb = "0.1.2"
 embedded-hal = "0.2.3"
