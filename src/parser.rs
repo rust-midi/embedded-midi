@@ -1,5 +1,7 @@
+//! Parse midi messages
 use crate::{Channel, Control, MidiMessage, Note};
 
+/// Keeps state for parsing Midi messages
 #[derive(Debug, Clone, PartialEq)]
 pub struct MidiParser {
     state: MidiParserState,
