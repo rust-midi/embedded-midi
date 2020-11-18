@@ -1,5 +1,5 @@
 //! Parse midi messages
-use crate::{Channel, Control, MidiMessage, Note};
+use midi_types::{Channel, Control, MidiMessage, Note};
 
 /// Keeps state for parsing Midi messages
 #[derive(Debug, Clone, PartialEq)]
