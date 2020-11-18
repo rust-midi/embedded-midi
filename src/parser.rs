@@ -1,9 +1,11 @@
 use crate::{Channel, Control, MidiMessage, Note};
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct MidiParser {
     state: MidiParserState,
 }
 
+#[derive(Debug, Clone, PartialEq)]
 enum MidiParserState {
     Idle,
     NoteOnRecvd(Channel),
