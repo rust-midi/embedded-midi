@@ -14,7 +14,7 @@ readme = "README.md"
 [dependencies]
 nb = "0.1.2"
 embedded-hal = "0.2.3"
-midi-types = "0.1.0"
+midi-types = "0.1.1"
 
 [dev-dependencies]
 embedded-hal-mock = "0.7.1"
