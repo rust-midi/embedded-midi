@@ -39,6 +39,7 @@ where
 
 pub struct MidiOut<TX> {
     tx: TX,
+    last_status: Option<u8>,
 }
 
 impl<TX, E> MidiOut<TX>
@@ -47,68 +48,56 @@ where
     E: Debug,
 {
     pub fn new(tx: TX) -> Self {
-        MidiOut { tx }
+        MidiOut {
+            tx,
+            last_status: None,
+        }
     }
 
-    pub fn write(&mut self, event: &MidiMessage) -> Result<(), E> {
-        match event {
+    pub fn write(&mut self, message: &MidiMessage) -> Result<(), E> {
+        match message {
             &MidiMessage::NoteOn(channel, note, velocity) => {
-                let channelnum: u8 = channel.into();
-                block!(self.tx.write(0x90 + channelnum))?;
-                block!(self.tx.write(note.into()))?;
-                block!(self.tx.write(velocity.into()))?;
+                self.write_channel_message(0x90, channel.into(), &[note.into(), velocity.into()])?;
             }
             &MidiMessage::NoteOff(channel, note, velocity) => {
-                let channelnum: u8 = channel.into();
-                block!(self.tx.write(0x80 + channelnum))?;
-                block!(self.tx.write(note.into()))?;
-                block!(self.tx.write(velocity.into()))?;
+                self.write_channel_message(0x80, channel.into(), &[note.into(), velocity.into()])?;
             }
             &MidiMessage::KeyPressure(channel, note, value) => {
-                let channelnum: u8 = channel.into();
-                block!(self.tx.write(0xA0 + channelnum))?;
-                block!(self.tx.write(note.into()))?;
-                block!(self.tx.write(value.into()))?;
+                self.write_channel_message(0xA0, channel.into(), &[note.into(), value.into()])?;
             }
             &MidiMessage::ControlChange(channel, control, value) => {
-                let channelnum: u8 = channel.into();
-                block!(self.tx.write(0xB0 + channelnum))?;
-                block!(self.tx.write(control.into()))?;
-                block!(self.tx.write(value.into()))?;
+                self.write_channel_message(0xB0, channel.into(), &[control.into(), value.into()])?;
             }
             &MidiMessage::ProgramChange(channel, program) => {
-                let channelnum: u8 = channel.into();
-                block!(self.tx.write(0xC0 + channelnum))?;
-                block!(self.tx.write(program.into()))?;
+                self.write_channel_message(0xC0, channel.into(), &[program.into()])?;
             }
             &MidiMessage::ChannelPressure(channel, value) => {
-                let channelnum: u8 = channel.into();
-                block!(self.tx.write(0xD0 + channelnum))?;
-                block!(self.tx.write(value.into()))?;
+                self.write_channel_message(0xD0, channel.into(), &[value.into()])?;
             }
             &MidiMessage::PitchBendChange(channel, value) => {
-                let channelnum: u8 = channel.into();
-                let (first_byte, second_byte) = value.into();
-                block!(self.tx.write(0xE0 + channelnum))?;
-                block!(self.tx.write(first_byte))?;
-                block!(self.tx.write(second_byte))?;
+                let (value_lsb, value_msb) = value.into();
+                self.write_channel_message(0xE0, channel.into(), &[value_lsb, value_msb])?;
             }
             &MidiMessage::QuarterFrame(value) => {
                 block!(self.tx.write(0xF1))?;
                 block!(self.tx.write(value.into()))?;
+                self.last_status = None;
             }
             &MidiMessage::SongPositionPointer(value) => {
-                let (first_byte, second_byte) = value.into();
+                let (value_lsb, value_msb) = value.into();
                 block!(self.tx.write(0xF2))?;
-                block!(self.tx.write(first_byte))?;
-                block!(self.tx.write(second_byte))?;
+                block!(self.tx.write(value_lsb))?;
+                block!(self.tx.write(value_msb))?;
+                self.last_status = None;
             }
             &MidiMessage::SongSelect(value) => {
                 block!(self.tx.write(0xF3))?;
                 block!(self.tx.write(value.into()))?;
+                self.last_status = None;
             }
             &MidiMessage::TuneRequest => {
                 block!(self.tx.write(0xF6))?;
+                self.last_status = None;
             }
             &MidiMessage::TimingClock => {
                 block!(self.tx.write(0xF8))?;
@@ -129,6 +118,21 @@ where
                 block!(self.tx.write(0xFF))?;
             }
         }
+
+        Ok(())
+    }
+
+    fn write_channel_message(&mut self, status_msb: u8, channel: u8, data: &[u8]) -> Result<(), E> {
+        let status = status_msb + channel;
+        // If the last command written had the same status/channel, the MIDI protocol allows us to
+        // omit sending the status byte again.
+        if self.last_status != Some(status) {
+            block!(self.tx.write(status))?;
+        }
+        for byte in data {
+            block!(self.tx.write(*byte))?;
+        }
+        self.last_status = Some(status);
 
         Ok(())
     }
