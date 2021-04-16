@@ -12,7 +12,7 @@ keywords = ["embedded", "midi", "uart"]
 readme = "README.md"
 
 [dependencies]
-nb = "0.1.2"
+nb = "1.0.0"
 embedded-hal = "0.2.4"
 midi-types = "0.1.1"
 
