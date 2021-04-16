@@ -3,8 +3,7 @@
 
 use cortex_m_rt::entry;
 use cortex_m_semihosting::hprintln;
-use embedded_midi::{MidiEvent, MidiOut};
-use nb::block;
+use embedded_midi::{MidiMessage, MidiOut};
 use panic_semihosting as _;
 use stm32f1xx_hal::{
     pac,
@@ -30,7 +29,7 @@ fn main() -> ! {
     let rx = gpioa.pa3;
 
     // Configure serial
-    let mut usart = Serial::usart2(
+    let usart = Serial::usart2(
         dp.USART2,
         (tx, rx),
         &mut afio.mapr,
@@ -40,16 +39,16 @@ fn main() -> ! {
     );
 
     // Configure Midi
-    let (mut tx, mut rx) = usart.split();
+    let (tx, _rx) = usart.split();
     let mut midi_out = MidiOut::new(tx);
 
     loop {
-        let event = MidiEvent::note_on(0u8.into(), 50u8.into(), 0x40u8.into());
-        hprintln!("on {:?}", event);
-        midi_out.write(event);
+        let event = MidiMessage::NoteOn(0u8.into(), 50u8.into(), 0x40u8.into());
+        hprintln!("on {:?}", event).ok();
+        midi_out.write(&event).ok();
 
-        let event = MidiEvent::note_off(0u8.into(), 50u8.into(), 0x40u8.into());
-        hprintln!("off {:?}", event);
-        midi_out.write(event);
+        let event = MidiMessage::NoteOff(0u8.into(), 50u8.into(), 0x40u8.into());
+        hprintln!("off {:?}", event).ok();
+        midi_out.write(&event).ok();
     }
 }

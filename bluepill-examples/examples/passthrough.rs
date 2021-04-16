@@ -2,7 +2,6 @@
 #![no_std]
 
 use cortex_m_rt::entry;
-use cortex_m_semihosting::hprintln;
 use embedded_midi::{MidiIn, MidiOut};
 use nb::block;
 use stm32f1xx_hal::{
@@ -31,7 +30,7 @@ fn main() -> ! {
     let rx = gpioa.pa3;
 
     // Configure serial
-    let mut usart = Serial::usart2(
+    let usart = Serial::usart2(
         dp.USART2,
         (tx, rx),
         &mut afio.mapr,
@@ -41,14 +40,14 @@ fn main() -> ! {
     );
 
     // Configure Midi
-    let (mut tx, mut rx) = usart.split();
+    let (tx, rx) = usart.split();
 
     let mut midi_in = MidiIn::new(rx);
     let mut midi_out = MidiOut::new(tx);
 
     loop {
         if let Ok(event) = block!(midi_in.read()) {
-            midi_out.write(event);
+            midi_out.write(&event).ok();
         }
     }
 }

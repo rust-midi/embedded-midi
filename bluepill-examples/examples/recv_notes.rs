@@ -30,7 +30,7 @@ fn main() -> ! {
     let rx = gpioa.pa3;
 
     // Configure serial
-    let mut usart = Serial::usart2(
+    let usart = Serial::usart2(
         dp.USART2,
         (tx, rx),
         &mut afio.mapr,
@@ -40,11 +40,11 @@ fn main() -> ! {
     );
 
     // Configure Midi
-    let (mut tx, mut rx) = usart.split();
+    let (_tx, rx) = usart.split();
     let mut midi_in = MidiIn::new(rx);
 
     loop {
         let event = block!(midi_in.read());
-        hprintln!("event {:?}", event);
+        hprintln!("event {:?}", event).ok();
     }
 }
