@@ -1,6 +1,6 @@
 [package]
 name = "embedded-midi"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2018"
 
 authors = ["Mendelt Siebenga <msiebenga@gmail.com>"]

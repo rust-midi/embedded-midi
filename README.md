@@ -3,8 +3,7 @@
 
 *Midi driver on top of embedded hal serial communications*
 
-
-*version: 0.0.1*
+*version: 0.1.1*
 ## License
 
 Licensed under either of
