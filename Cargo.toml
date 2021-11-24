@@ -13,8 +13,8 @@ readme = "README.md"
 
 [dependencies]
 nb = "1.0.0"
-embedded-hal = "0.2.4"
+embedded-hal = "0.2.6"
 midi-types = "0.1.1"
 
 [dev-dependencies]
-embedded-hal-mock = "0.7.2"
+embedded-hal-mock = "0.8.0"
