@@ -35,7 +35,6 @@ Bugfix release, with thanks for David Stalnaker for contributions
 - Use github actions for CI
 - Various bugfixes
 
-
 ## [0.0.2] - 2020-07-06
 
 ### Added
