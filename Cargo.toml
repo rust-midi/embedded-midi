@@ -15,7 +15,7 @@ readme = "README.md"
 [dependencies]
 nb = "1.0.0"
 embedded-hal = "0.2.6"
-midi-types = "0.1.1"
+midi-types = { git = "https://github.com/x37v/midi-types", branch = "xnor/render-parse" }
 
 [dev-dependencies]
 embedded-hal-mock = "0.8.0"
