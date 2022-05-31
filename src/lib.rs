@@ -2,17 +2,14 @@
 //!
 #![no_std]
 #[warn(missing_debug_implementations, missing_docs)]
-mod parser;
-
 use core::fmt::Debug;
 use embedded_hal::serial;
-pub use midi_types::{Channel, Control, MidiMessage, Note, Program};
+pub use midi_types::{Channel, Control, MidiByteStreamParser, MidiMessage, Note, Program};
 use nb::block;
-pub use parser::MidiParser;
 
 pub struct MidiIn<RX> {
     rx: RX,
-    parser: MidiParser,
+    parser: MidiByteStreamParser,
 }
 
 impl<RX, E> MidiIn<RX>
@@ -23,7 +20,7 @@ where
     pub fn new(rx: RX) -> Self {
         MidiIn {
             rx,
-            parser: MidiParser::new(),
+            parser: MidiByteStreamParser::new(),
         }
     }
 
