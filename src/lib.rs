@@ -1,11 +1,16 @@
 //! *Midi driver on top of embedded hal serial communications*
 //!
 #![no_std]
+pub use midi_parse_render::midi_types;
 #[warn(missing_debug_implementations, missing_docs)]
-use core::fmt::Debug;
-use embedded_hal::serial;
-pub use midi_types::{Channel, Control, MidiByteStreamParser, MidiMessage, Note, Program};
-use nb::block;
+use {
+    core::fmt::Debug,
+    embedded_hal::serial,
+    midi_parse_render::{
+        midi_types::MidiMessage, parse::MidiByteStreamParser, render::render as render_message,
+    },
+    nb::block,
+};
 
 pub struct MidiIn<RX> {
     rx: RX,
@@ -27,7 +32,7 @@ where
     pub fn read(&mut self) -> nb::Result<MidiMessage, E> {
         let byte = self.rx.read()?;
 
-        match self.parser.parse_byte(byte) {
+        match self.parser.parse(byte) {
             Some(event) => Ok(event),
             None => Err(nb::Error::WouldBlock),
         }
@@ -53,7 +58,7 @@ where
 
     pub fn write(&mut self, message: &MidiMessage) -> Result<(), E> {
         let mut buf = [0u8; 3];
-        if let Ok(l) = message.render(buf.as_mut()) {
+        if let Ok(l) = render_message(message, buf.as_mut()) {
             for b in buf.iter().take(l) {
                 block!(self.tx.write(*b))?;
             }
