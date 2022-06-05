@@ -2,7 +2,7 @@
 name = "embedded-midi"
 version = "0.1.2"
 edition = "2018"
-rust-version = "1.38"
+rust-version = "1.51"
 
 authors = ["Mendelt Siebenga <msiebenga@gmail.com>"]
 license = "MIT/Apache-2.0"
