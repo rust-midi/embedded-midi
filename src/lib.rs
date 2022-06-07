@@ -5,11 +5,11 @@
 use {
     core::fmt::Debug,
     embedded_hal::serial,
-    midi_convert::{MidiByteStreamParser, MidiRenderSlice},
+    midi_convert::{midi_types::MidiMessage, MidiByteStreamParser, MidiRenderSlice},
     nb::block,
 };
 
-pub use midi_convert::midi_types::{Channel, Control, MidiMessage, Note, Program};
+pub use midi_convert::midi_types;
 
 pub struct MidiIn<RX> {
     rx: RX,
