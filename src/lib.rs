@@ -1,7 +1,7 @@
 //! *Midi driver on top of embedded hal serial communications*
 
 #![no_std]
-#[warn(missing_debug_implementations)]
+#![warn(missing_debug_implementations)]
 use core::fmt::Debug;
 use embedded_hal::serial;
 use midi_convert::midi_types::MidiMessage;
