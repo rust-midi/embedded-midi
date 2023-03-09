@@ -2,7 +2,7 @@
 name = "embedded-midi"
 version = "0.1.2"
 edition = "2018"
-rust-version = "1.51"
+rust-version = "1.62.1"
 
 authors = ["Mendelt Siebenga <msiebenga@gmail.com>"]
 license = "MIT/Apache-2.0"
@@ -15,7 +15,7 @@ readme = "README.md"
 [dependencies]
 nb = "1.0.0"
 embedded-hal = "0.2.6"
-midi-convert = "0.1.0"
+midi-convert = "0.2.0"
 
 [dev-dependencies]
 embedded-hal-mock = "0.8.0"

@@ -40,7 +40,7 @@ jobs:
         rust:
           - stable
           - beta
-          - 1.60.0
+          - 1.62.1
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@master
