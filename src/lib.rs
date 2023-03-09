@@ -1,20 +1,23 @@
 //! *Midi driver on top of embedded hal serial communications*
-//!
+
 #![no_std]
-#![warn(missing_debug_implementations)]
-use {
-    core::fmt::Debug,
-    embedded_hal::serial,
-    midi_convert::{midi_types::MidiMessage, MidiByteStreamParser, MidiRenderSlice},
-    nb::block,
+#[warn(missing_debug_implementations)]
+use core::fmt::Debug;
+use embedded_hal::serial;
+use midi_convert::midi_types::MidiMessage;
+
+use midi_convert::{
+    parse::MidiParser,
+    render::{MidiRenderer, MidiTransport},
 };
+use nb::block;
 
 pub use midi_convert::midi_types;
 
 #[derive(Debug)]
 pub struct MidiIn<RX> {
     rx: RX,
-    parser: MidiByteStreamParser,
+    parser: MidiParser,
 }
 
 impl<RX, E> MidiIn<RX>
@@ -25,7 +28,7 @@ where
     pub fn new(rx: RX) -> Self {
         MidiIn {
             rx,
-            parser: MidiByteStreamParser::new(),
+            parser: MidiParser::new(),
         }
     }
 
@@ -40,8 +43,23 @@ where
 }
 
 #[derive(Debug)]
+struct SerialTransport<TX>(TX);
+
+impl<TX, E> MidiTransport for SerialTransport<TX>
+where
+    TX: serial::Write<u8, Error = E>,
+    E: Debug,
+{
+    type Error = E;
+
+    fn write(&mut self, value: u8) -> Result<(), Self::Error> {
+        block!(self.0.write(value))
+    }
+}
+
+#[derive(Debug)]
 pub struct MidiOut<TX> {
-    tx: TX,
+    renderer: MidiRenderer<TX>,
 }
 
 impl<TX, E> MidiOut<TX>
@@ -50,21 +68,17 @@ where
     E: Debug,
 {
     pub fn new(tx: TX) -> Self {
-        MidiOut { tx }
+        MidiOut {
+            renderer: MidiRenderer::new(SerialTransport(tx)),
+        }
     }
 
     pub fn release(self) -> TX {
-        self.tx
+        self.renderer.release()
     }
 
     pub fn write(&mut self, message: &MidiMessage) -> Result<(), E> {
-        let mut buf = [0u8; 3];
-        let len = message.render_slice(buf.as_mut());
-        for b in buf.iter().take(len) {
-            block!(self.tx.write(*b))?;
-        }
-
-        Ok(())
+        self.renderer.render(message)
     }
 }
 
@@ -97,7 +111,6 @@ mod tests {
         );
     }
 
-    /*
     #[test]
     fn note_on_second_note_should_skip_status() {
         verify_writes(
@@ -108,7 +121,6 @@ mod tests {
             &[0x92, 0x76, 0x34, 0x33, 0x65],
         );
     }
-    */
 
     #[test]
     fn note_on_second_note_different_channel_should_not_skip_status() {

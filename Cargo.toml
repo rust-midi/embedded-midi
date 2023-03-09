@@ -15,7 +15,7 @@ readme = "README.md"
 [dependencies]
 nb = "1.0.0"
 embedded-hal = "0.2.6"
-midi-convert = "0.1.0"
+midi-convert = { git = "https://github.com/rust-midi/midi-convert.git", branch = "stateful_rendering" }
 
 [dev-dependencies]
 embedded-hal-mock = "0.8.0"
