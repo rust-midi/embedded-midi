@@ -59,7 +59,7 @@ where
 
 #[derive(Debug)]
 pub struct MidiOut<TX> {
-    renderer: MidiRenderer<SerialTransport<TX>>,
+    renderer: MidiRenderer<SerialTransport<TX>, true>,
 }
 
 impl<TX, E> MidiOut<TX>
