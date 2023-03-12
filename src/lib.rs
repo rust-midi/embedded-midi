@@ -1,7 +1,7 @@
 //! *Midi driver on top of embedded hal serial communications*
 //!
 #![no_std]
-#[warn(missing_debug_implementations, missing_docs)]
+#![warn(missing_debug_implementations)]
 use {
     core::fmt::Debug,
     embedded_hal::serial,
@@ -11,6 +11,7 @@ use {
 
 pub use midi_convert::midi_types;
 
+#[derive(Debug)]
 pub struct MidiIn<RX> {
     rx: RX,
     parser: MidiByteStreamParser,
@@ -38,6 +39,7 @@ where
     }
 }
 
+#[derive(Debug)]
 pub struct MidiOut<TX> {
     tx: TX,
 }
