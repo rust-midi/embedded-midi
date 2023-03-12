@@ -74,7 +74,7 @@ where
     }
 
     pub fn release(self) -> TX {
-        self.renderer.release()
+        self.renderer.release().0
     }
 
     pub fn write(&mut self, message: &MidiMessage) -> Result<(), E> {
