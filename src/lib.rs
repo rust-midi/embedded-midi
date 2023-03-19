@@ -52,8 +52,10 @@ where
 {
     type Error = E;
 
-    fn write(&mut self, value: u8) -> Result<(), Self::Error> {
-        block!(self.0.write(value))
+    fn write(&mut self, bytes: &[u8]) -> Result<(), Self::Error> {
+        bytes
+            .iter()
+            .try_for_each(|value| block!(self.0.write(*value)))
     }
 }
 
