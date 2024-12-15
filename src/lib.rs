@@ -3,7 +3,7 @@
 #![no_std]
 #![warn(missing_debug_implementations)]
 use core::fmt::Debug;
-use embedded_hal::serial;
+use embedded_hal_nb::serial;
 use midi_convert::midi_types::MidiMessage;
 
 use midi_convert::{
@@ -88,7 +88,7 @@ where
 mod tests {
     extern crate std;
     use super::*;
-    use embedded_hal_mock::serial;
+    use embedded_hal_mock::eh1::serial;
     use std::vec::Vec;
 
     fn verify_writes(messages: &[MidiMessage], bytes: &[u8]) {
