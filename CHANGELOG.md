@@ -6,26 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-...
-
 ### Changed
-...
+- Update embedded-hal to v1 with thanks to Christof Laenzlinger
+- Bumped msrv to 1.63
+- Move midi parsing to `midi-convert` crate
 
 ## [0.1.2] - 2021-11-24
-Dependencies update
 
 ### Fixes
 - Update dependencies
 
 ## [0.1.1] - 2021-04-16
-Dependency update
 
 ### Fixes
 - Update dependencies
 
 ## [0.1.0] - 2020-11-20
-Bugfix release, with thanks for David Stalnaker for contributions 
+Bugfix release, with thanks to David Stalnaker for contributions 
 
 ### Added
 - Implement running status for midi-out

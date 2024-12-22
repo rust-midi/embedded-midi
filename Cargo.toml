@@ -13,8 +13,8 @@ keywords = ["embedded", "midi", "uart"]
 readme = "README.md"
 
 [dependencies]
-nb = "1.0.0"
-embedded-hal-nb = "1.0.0"
+nb = "1.0"
+embedded-hal-nb = "1.0"
 midi-convert = "0.2.0"
 
 [dev-dependencies]
